@@ -22,7 +22,6 @@ export const authMiddleware = async (
 ) => {
   try {
     const token = req.headers.authorization;
-      console.log(token,"111111")
 
     if (!token) {
       return res
@@ -31,14 +30,12 @@ export const authMiddleware = async (
     }
 
     const decode = jwt.verify(token, env.JWT_ACCESS_SECRET) as jwt.JwtPayload;
-    console.log(decode,"decode")
     const user = await prisma.user.findUnique({
       where: {
         id: decode.userId,
       },
       select: { id: true, email: true, name: true },
     });
-    console.log(user,"user")
     if (!user) {
       return res
         .status(401)

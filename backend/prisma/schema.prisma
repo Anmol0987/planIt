@@ -62,7 +62,7 @@ model Invite {
   trip      Trip     @relation(fields: [tripId], references: [id])
   expiresAt DateTime
   accepted  Boolean  @default(false)
-  createdAt DateTime
+  createdAt DateTime @default(now())
 }
 
 enum Role {
