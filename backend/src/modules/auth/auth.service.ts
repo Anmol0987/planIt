@@ -1,8 +1,6 @@
-import { ca } from "zod/v4/locales";
 import prisma from "../../prisma";
 import { comparePassword, hashPassword } from "../../utils/hash";
 import { signAccessToken, signRefreshToken } from "../../utils/jwt";
-import { date } from "zod";
 
 export const registerUser = async (
   name: string,
