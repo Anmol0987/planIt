@@ -7,12 +7,6 @@ export const CreateInvites =async (req: Request, res: Response) => {
     const { email } = req.body;
     const { tripId } = req.params;
 
-    console.log(userId,"userId")
-    console.log(email,"email")
-    console.log(tripId,"trip")
-
-
-
     if (userId) {
       const invite = await inviteService.createInvite(userId,tripId, email );
       res.status(201).json({ success: true, invite });
@@ -26,10 +20,8 @@ export const CreateInvites =async (req: Request, res: Response) => {
 };
 export const AcceptInvite = async (req: Request, res: Response) => {
   try {
-    console.log (" thisssss")
     const userId = req.user?.id;
     const { token } = req.body;
-    console.log(token)
     if (userId) {
       const result = await inviteService.AcceptInvite(userId, token);
       res.status(201).json({ success: true, result });

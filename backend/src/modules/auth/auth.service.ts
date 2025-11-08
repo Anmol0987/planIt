@@ -47,7 +47,7 @@ export const loginUser = async (password: string, email: string) => {
     const valid = await comparePassword(password, user.passwordHash);
     if (!valid) throw new Error("Invalid credentials");
 
-    const accessToken = signAccessToken({ userId: user.id });
+    const accessToken = signAccessToken({ userId: user.id,email:user.email });
     const refreshToken = signRefreshToken({ userId: user.id });
 
     await prisma.refreshToken.create({
