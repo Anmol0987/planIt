@@ -6,10 +6,11 @@ import { useRouter } from "next/navigation";
 import { api } from "@/app/lib/api";
 import toast from "react-hot-toast";
 
-// ✅ shadcn/ui imports
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import TripForm from "@/components/forms/tripForm";
+import Link from "next/link";
 
 export default function Dashboard() {
   const { token, user } = useAuthStore();
@@ -53,28 +54,28 @@ export default function Dashboard() {
 
           <TripForm onTripCreated={() => fetchTrips()} />
         </header>
-
-        {/* Trips List */}
         <section>
           {trips.length > 0 ? (
             <div className="space-y-3">
               {trips.map((t) => (
-                <Card key={t.id} className="border border-muted shadow-sm">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg font-medium">
-                      {t.name}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-muted-foreground text-sm">
-                    Destination: {t.destination}
-                    <br />
-                    Dates:{" "}
-                    <span className="text-foreground">
-                      {new Date(t.startDate).toLocaleDateString()} -{" "}
-                      {new Date(t.endDate).toLocaleDateString()}
-                    </span>
-                  </CardContent>
-                </Card>
+                <Link key={t.id} href={`/dashboard/${t.id}`}>
+                  <Card className="border border-muted shadow-sm hover:bg-accent cursor-pointer transition">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg font-medium">
+                        {t.name}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-muted-foreground text-sm">
+                      Destination: {t.destination}
+                      <br />
+                      Dates:{" "}
+                      <span className="text-foreground">
+                        {new Date(t.startDate).toLocaleDateString()} -{" "}
+                        {new Date(t.endDate).toLocaleDateString()}
+                      </span>
+                    </CardContent>
+                  </Card>
+                </Link>
               ))}
             </div>
           ) : (

@@ -2,6 +2,9 @@ import { signInSchema, signUpSchema } from "./auth.schema";
 import { Request, Response } from "express";
 import { loginUser, registerUser } from "./auth.service";
 import z from "zod";
+import { env } from "../../config/env";
+import prisma from "../../prisma";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 /**
  * Handles user registration
@@ -26,12 +29,10 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
     }
     // Hide implementation details from client
     console.error("[SignUp Error]", error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "An unexpected error occurred. Please try again later.",
-      });
+    res.status(500).json({
+      success: false,
+      message: "An unexpected error occurred. Please try again later.",
+    });
   }
 };
 
@@ -70,5 +71,31 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
     console.error("[Login Error]", error);
     res.status(401).json({ success: false, message: "Invalid credentials." });
+  }
+};
+
+export const refreshAccessToken = async (req: Request, res: Response) => {
+  const token = req.cookies?.refreshToken;
+  if (!token) return res.status(401).json({ message: "No refresh token" });
+
+  try {
+    const payload = jwt.verify(token, env.JWT_REFRESH_SECRET) as JwtPayload;
+    const user = await prisma.user.findUnique({
+      where: { id: payload.userId },
+    });
+    if (!user) return res.status(401).json({ message: "Invalid user" });
+
+    // Issue new access token
+    const newAccessToken = jwt.sign(
+      { userId: user.id, email: user.email },
+      env.JWT_ACCESS_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    return res.json({ accessToken: newAccessToken });
+  } catch {
+    return res
+      .status(401)
+      .json({ message: "Invalid or expired refresh token" });
   }
 };

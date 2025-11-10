@@ -6,9 +6,9 @@ import { Server, Socket } from "socket.io";
  * @param socket - The connected client socket.
  */
 export function setupTripSocket(io: Server, socket: Socket): void {
-  const user = (socket as any)?.user;
+  const user = socket.data.user as { userId: string; email?: string };
 
-  if (!user || !user.id || !user.email) {
+  if (!user || !user.userId|| !user.email) {
     socket.disconnect(true);
     console.error("User object is invalid or missing. Disconnecting socket.");
     return;
@@ -27,7 +27,7 @@ export function setupTripSocket(io: Server, socket: Socket): void {
     socket.join(tripId);
     // Notify other members in the trip
     socket.to(tripId).emit("trip:memberJoined", {
-      userId: user.id,
+      userId: user.userId,
       email: user.email,
       message: `${user.email} joined the trip`,
     });

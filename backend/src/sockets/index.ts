@@ -14,7 +14,7 @@ let io: Server | undefined;
 export const setupSocketServer = (server: http.Server): Server => {
   io = new Server(server, {
     cors: {
-      origin: true, // Allows all origins
+      origin: ["http://localhost:3001"],
       credentials: true,
       methods: ["GET", "POST"],
       allowedHeaders: ["Authorization"],
@@ -35,7 +35,7 @@ export const setupSocketServer = (server: http.Server): Server => {
         token,
         env.JWT_ACCESS_SECRET
       ) as jwt.JwtPayload;
-
+      socket.data.user = decoded;
       (socket as any).user = decoded;
       next();
     } catch {
@@ -45,6 +45,7 @@ export const setupSocketServer = (server: http.Server): Server => {
 
   io.on("connection", (socket: Socket) => {
     const user = (socket as any).user;
+    console.log("🧠 Full user object on connect:", user);
     if (user && user.email) {
       console.log(`User connected: ${user.email}`);
     }
