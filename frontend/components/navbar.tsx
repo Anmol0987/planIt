@@ -1,10 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useTheme } from "@/app/lib/theme";
+import { useTheme } from "next-themes";
 import { Sun, Moon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/app/lib/store";
+import toast from "react-hot-toast";
 
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
@@ -13,6 +14,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     logout();
+    toast.success("successfully logout");
     router.push("/");
   };
 

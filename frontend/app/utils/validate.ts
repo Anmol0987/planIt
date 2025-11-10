@@ -46,3 +46,16 @@ export const loginSchema = z.object({
       message: "Password must contain at least one special character.",
     }),
 });
+
+
+export const tripSchema = z
+  .object({
+    name: z.string().min(2, "Trip name is required"),
+    destination: z.string().min(2, "Destination is required"),
+    startDate: z.string().min(1, "Start date required"),
+    endDate: z.string().min(1, "End date required"),
+  })
+  .refine(
+    (data) => new Date(data.endDate) >= new Date(data.startDate),
+    { message: "End date must be after start date", path: ["endDate"] }
+  );

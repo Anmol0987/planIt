@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuthStore } from "@/app/lib/store";
 import { useRouter } from "next/navigation";
 import { api } from "@/app/lib/api";
@@ -9,11 +9,29 @@ import toast from "react-hot-toast";
 // ✅ shadcn/ui imports
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import TripForm from "@/components/forms/tripForm";
 
 export default function Dashboard() {
   const { token, user } = useAuthStore();
   const router = useRouter();
   const [trips, setTrips] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchTrips = useCallback(async () => {
+    if (!token) return;
+
+    try {
+      setLoading(true);
+      const res = await api.get("/trip", {
+        headers: { Authorization: token },
+      });
+      setTrips(res.data.data);
+    } catch {
+      toast.error("Failed to load trips");
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
 
   useEffect(() => {
     if (!token) {
@@ -21,16 +39,7 @@ export default function Dashboard() {
       return;
     }
 
-    (async () => {
-      try {
-        const res = await api.get("/trip", {
-          headers: { Authorization: `${token}` },
-        });
-        setTrips(res.data.data);
-      } catch {
-        toast.error("Failed to load trips");
-      }
-    })();
+    fetchTrips();
   }, [token]);
 
   return (
@@ -39,15 +48,10 @@ export default function Dashboard() {
         {/* Header */}
         <header className="flex items-center justify-between">
           <h2 className="text-2xl font-semibold tracking-tight">
-            Welcome, {user?.email?.split("@")[0] || "Traveler"} ✈️
+            Welcome, {user?.email?.split("@")[0] || "Traveler ✈️"}
           </h2>
 
-          <Button
-            onClick={() => toast("Trip creation coming soon!")}
-            className="rounded-md"
-          >
-            + New Trip
-          </Button>
+          <TripForm onTripCreated={() => fetchTrips()} />
         </header>
 
         {/* Trips List */}

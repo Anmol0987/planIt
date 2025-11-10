@@ -5,8 +5,8 @@ export const CreateTrip = async (userId: string, data: any) => {
     data: {
       name: data.name,
       destination: data.destination,
-      startDate: data.startDate,
-      endDate: data.endDate,
+      startDate: new Date(data.startDate),
+      endDate: new Date(data.endDate),
       createdById: userId,
       members: {
         create: { userId, role: "ADMIN" },
