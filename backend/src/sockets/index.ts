@@ -13,7 +13,12 @@ let io: Server | undefined;
  */
 export const setupSocketServer = (server: http.Server): Server => {
   io = new Server(server, {
-    cors: { origin: "*" },
+    cors: {
+      origin: true, // Allows all origins
+      credentials: true,
+      methods: ["GET", "POST"],
+      allowedHeaders: ["Authorization"],
+    },
   });
 
   io.use((socket: Socket, next) => {

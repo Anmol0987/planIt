@@ -10,12 +10,12 @@ const app = express();
 app.use(helmet());
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: ["http://localhost:3000"], credentials: true }));
+app.use(cors({ origin: ["http://localhost:3001"], credentials: true }));
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/trip", tripRoutes);
 app.use("/api/v1/invite", inviteRoutes);
 
-app.get("/", (_, res) => res.send("Trip SaaS Backend Running "));
+app.get("/", (_, res) => res.send("PlanIt Backend Running "));
 
 export default app;

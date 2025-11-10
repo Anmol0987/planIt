@@ -1,12 +1,13 @@
 import prisma from "../../prisma";
 import { comparePassword, hashPassword } from "../../utils/hash";
 import { signAccessToken, signRefreshToken } from "../../utils/jwt";
+import { User } from "@prisma/client";
 
 export const registerUser = async (
   name: string,
   email: string,
   password: string
-) => {
+) : Promise<User> => {
   try {
     //checks in DB is user already exists with email
     const exist = await prisma.user.findUnique({
@@ -27,17 +28,15 @@ export const registerUser = async (
     });
     return user;
   } catch (e) {
-    // Log the error for internal monitoring
     console.error("Error in registerUser:", e);
 
-    // Return a generic error to prevent leaking sensitive info
     throw new Error(
       "An error occurred while registering the user. Please try again later."
     );
   }
 };
 
-export const loginUser = async (password: string, email: string) => {
+export const loginUser = async (password: string, email: string): Promise<{user: User, accessToken: string, refreshToken: string}> => {
   try {
     const user = await prisma.user.findUnique({
       where: { email },
@@ -59,10 +58,8 @@ export const loginUser = async (password: string, email: string) => {
     });
     return {user,accessToken,refreshToken}
   } catch (e) {
-    // Log the error for internal monitoring
-    console.error("Error in loginUser:", e);
+    console.error("Error in loginUser:", e as Error );
 
-    // Return a generic error to prevent leaking sensitive info
     throw new Error(
       "An error occurred while Logging the user. Please try again later."
     );
