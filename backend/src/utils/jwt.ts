@@ -12,14 +12,10 @@ export const signAccessToken = (payload: object): string => {
   });
 };
 
-/**
- * Description
- * @param {object} payload
- * @returns {any}
- */
-export const signRefreshToken = (payload: object): string => {
-  return jwt.sign(payload, env.JWT_REFRESH_SECRET as jwt.Secret, {
-    expiresIn: env.REFRESH_TOKEN_EXP as jwt.SignOptions["expiresIn"],
+
+export const signRefreshToken = (payload: { userId: string; email: string }) => {
+  return jwt.sign(payload, env.JWT_REFRESH_SECRET, {
+    expiresIn: "30d",
   });
 };
 

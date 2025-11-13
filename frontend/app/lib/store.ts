@@ -36,10 +36,15 @@ export const useAuthStore = create<AuthState>()(
         try {
           const refreshToken = get().refreshToken;
           if (!refreshToken) return;
+          console.log(refreshToken)
           const res = await api.post("/auth/refresh", { refreshToken });
           const newAccessToken = res.data.accessToken;
-          if (newAccessToken) {
-            set({ token: newAccessToken });
+          const newRefreshToken = res.data.refreshToken;
+
+          if (newAccessToken && newRefreshToken) {
+            set({ token: newAccessToken,
+              refreshToken:newRefreshToken
+             });
             console.log("Access token refreshed successfully");
           }
         } catch (err) {

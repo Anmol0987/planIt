@@ -9,12 +9,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!hydrated) return;
 
     const init = async () => {
-      if (!token) await refreshAccessToken();
+      try{ await refreshAccessToken();}
+      catch{}
       setReady(true);
     };
 
     init();
-  }, [token, hydrated]);
+  }, [ hydrated]);
   if (!ready) {
     return (
       <div className="min-h-screen flex items-center justify-center">

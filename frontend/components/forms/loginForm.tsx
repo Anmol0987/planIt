@@ -32,7 +32,7 @@ export default function LoginForm() {
   const onSubmit = async (data: LoginData) => {
     try {
       const res = await api.post("/auth/signin", data);
-      setAuth(res.data.user, res.data.accessToken);
+      setAuth(res.data.user, res.data.accessToken,res.data.refreshToken);
       toast.success("Welcome back!");
       router.push("/dashboard");
     } catch (err: any) {
