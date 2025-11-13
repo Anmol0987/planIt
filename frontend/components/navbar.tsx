@@ -6,15 +6,21 @@ import { Sun, Moon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/app/lib/store";
 import toast from "react-hot-toast";
+import { useEffect, useState } from "react";
 
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const { user, logout } = useAuthStore();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
+  if (!mounted) {
+    return null;
+  }
   const handleLogout = () => {
     logout();
-    toast.success("successfully logout")
+    toast.success("successfully logout");
     router.push("/");
   };
 

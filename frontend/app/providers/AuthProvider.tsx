@@ -1,13 +1,27 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "@/app/lib/store";
 
-export default function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { token, refreshToken } = useAuthStore();
-
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const { hydrated, token, refreshAccessToken } = useAuthStore();
+  const [ready, setReady] = useState(false);
   useEffect(() => {
-    if (!token) refreshToken();
-  }, [token]);
+    if (!hydrated) return;
+
+    const init = async () => {
+      if (!token) await refreshAccessToken();
+      setReady(true);
+    };
+
+    init();
+  }, [token, hydrated]);
+  if (!ready) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
 
   return <>{children}</>;
-}
+};

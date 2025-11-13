@@ -2,6 +2,7 @@ import { randomBytes } from "crypto";
 import prisma from "../../prisma";
 import { Role } from "@prisma/client";
 import { Invite } from "@prisma/client";
+import { getIO } from "../../sockets";
 
 export const inviteService = {
   async createInvite(
@@ -12,6 +13,7 @@ export const inviteService = {
     const normalizedTripId = tripId.trim();
     const normalizedUserId = userId.trim();
 
+    console.log(normalizedTripId, normalizedUserId);
     const isAdmin = await prisma.tripUser.findMany({
       where: {
         userId: normalizedUserId,
@@ -19,9 +21,20 @@ export const inviteService = {
         role: Role.ADMIN,
       },
     });
+    console.log(isAdmin, "admin");
     if (!isAdmin)
       throw new Error("Only admin can invite new members to the trip");
+    const existingInvite = await prisma.invite.findFirst({
+      where: {
+        email,
+        tripId: normalizedTripId,
+        accepted: false, // not accepted yet
+      },
+    });
 
+    if (existingInvite) {
+      throw new Error("This email is already invited to this trip.");
+    }
     const token = randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000); //48 hrs
 
@@ -32,6 +45,12 @@ export const inviteService = {
         expiresAt,
         tripId,
       },
+    });
+    console.log("invite============", invite);
+    getIO().to(tripId).emit("trip:inviteCreated", {
+      email,
+      tripId,
+      createdAt: invite.createdAt,
     });
 
     //email by nodemailer later
@@ -83,6 +102,7 @@ export const inviteService = {
           role: Role.ADMIN,
         },
       });
+
       if (!admin) throw new Error("Only admin can view invites");
 
       const invites = await prisma.invite.findMany({

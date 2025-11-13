@@ -10,47 +10,49 @@ type User = {
 export type AuthState = {
   user: User | null;
   token: string | null;
-  setAuth: (user: User, token: string) => void;
+  refreshToken: string | null;
+  hydrated: boolean;
+  setAuth: (user: User, token: string, refreshToken: string) => void;
   logout: () => void;
-  refreshToken: () => Promise<void>;
+  updateAccessToken: (token: string) => void;
+  refreshAccessToken: () => Promise<void>;
+  setHydrated: (value: boolean) => void;
 };
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       token: null,
+      refreshToken: null,
+      hydrated: false,
+      setHydrated: (value) => set({ hydrated:value }),
 
-      setAuth: (user, token) => set({ user, token }),
-
-      // ✅ Logout: clears both Zustand state and localStorage
-      logout: () => {
-        set({ user: null, token: null });
-        localStorage.removeItem("auth-storage");
-      },
-
-      // ✅ Try to get new access token via backend refresh route
-      refreshToken: async () => {
+      setAuth: (user, token, refreshToken) =>
+        set({ user, token, refreshToken }),
+      updateAccessToken: (token) => set({ token }),
+      logout: () => set({ user: null, token: null, refreshToken: null }),
+      refreshAccessToken: async () => {
         try {
-          const res = await api.post(
-            "/auth/refresh",
-            {},
-            { withCredentials: true }
-          );
-          const newToken = res.data.accessToken;
-          if (newToken) {
-            set({ token: newToken });
-          } else {
-            set({ user: null, token: null });
+          const refreshToken = get().refreshToken;
+          if (!refreshToken) return;
+          const res = await api.post("/auth/refresh", { refreshToken });
+          const newAccessToken = res.data.accessToken;
+          if (newAccessToken) {
+            set({ token: newAccessToken });
+            console.log("Access token refreshed successfully");
           }
         } catch (err) {
-          set({ user: null, token: null });
+          console.error("Failed to refresh token:", err);
+          get().logout();
         }
       },
     }),
     {
       name: "auth-storage",
-      partialize: (state) => ({ user: state.user, token: state.token }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated(true);
+      },
     }
   )
 );

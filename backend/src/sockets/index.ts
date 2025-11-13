@@ -31,12 +31,16 @@ export const setupSocketServer = (server: http.Server): Server => {
         return next(new Error("No token provided"));
       }
 
-      const decoded = jwt.verify(
-        token,
-        env.JWT_ACCESS_SECRET
-      ) as jwt.JwtPayload;
-      socket.data.user = decoded;
-      (socket as any).user = decoded;
+      const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET) as {
+        userId: string;
+        email?: string;
+        iat?: number;
+        exp?: number;
+      };
+      socket.data.user =  {
+        userId: decoded.userId,
+        email: decoded.email,
+      };
       next();
     } catch {
       return next(new Error("Invalid or expired token"));
@@ -44,7 +48,7 @@ export const setupSocketServer = (server: http.Server): Server => {
   });
 
   io.on("connection", (socket: Socket) => {
-    const user = (socket as any).user;
+    const user = socket.data.user;
     console.log("🧠 Full user object on connect:", user);
     if (user && user.email) {
       console.log(`User connected: ${user.email}`);

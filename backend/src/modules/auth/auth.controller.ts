@@ -5,6 +5,7 @@ import z from "zod";
 import { env } from "../../config/env";
 import prisma from "../../prisma";
 import jwt, { JwtPayload } from "jsonwebtoken";
+import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../../utils/jwt";
 
 /**
  * Handles user registration
@@ -75,27 +76,44 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 };
 
 export const refreshAccessToken = async (req: Request, res: Response) => {
-  const token = req.cookies?.refreshToken;
-  if (!token) return res.status(401).json({ message: "No refresh token" });
-
   try {
-    const payload = jwt.verify(token, env.JWT_REFRESH_SECRET) as JwtPayload;
-    const user = await prisma.user.findUnique({
-      where: { id: payload.userId },
+    const token = req.body.refreshToken;
+    if (!token)
+      return res.status(400).json({ message: "Missing refresh token" });
+
+    const decoded = verifyRefreshToken(token);
+    if (!decoded)
+      return res.status(403).json({ message: "Invalid refresh token" });
+    const payload = decoded as JwtPayload & { userId: string; email?: string };
+
+    const stored = await prisma.refreshToken.findUnique({ where: { token } });
+    if (!stored || stored.revoked || stored.expiresAt < new Date()) {
+      return res
+        .status(403)
+        .json({ message: "Refresh token expired or revoked" });
+    }
+
+    const newAccessToken = signAccessToken({
+      userId: payload.userId,
+      email: payload.email,
     });
-    if (!user) return res.status(401).json({ message: "Invalid user" });
+    const newRefreshToken = signRefreshToken({ userId: payload.userId });
+    await prisma.refreshToken.update({
+      where: { token },
+      data: { revoked: true },
+    });
+    await prisma.refreshToken.create({
+      data: {
+        userId: payload.userId,
+        token: newRefreshToken,
+        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      },
+    });
 
-    // Issue new access token
-    const newAccessToken = jwt.sign(
-      { userId: user.id, email: user.email },
-      env.JWT_ACCESS_SECRET,
-      { expiresIn: "15m" }
-    );
 
-    return res.json({ accessToken: newAccessToken });
-  } catch {
-    return res
-      .status(401)
-      .json({ message: "Invalid or expired refresh token" });
+    return res.status(200).json({ accessToken: newAccessToken,refreshToken:newRefreshToken });
+  } catch (err) {
+    console.error("Error refreshing access token:", err);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };

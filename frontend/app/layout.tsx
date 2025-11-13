@@ -2,8 +2,8 @@ import Navbar from "@/components/navbar";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "react-hot-toast";
-import AuthProvider from "./providers/AuthProvider";
-
+import { AuthProvider } from "./providers/AuthProvider";
+import SocketProvider from "./providers/SocketProvider";
 
 export default function RootLayout({
   children,
@@ -13,13 +13,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          <Navbar />
-          <AuthProvider>
+        <AuthProvider>
+          <SocketProvider>
+            <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+              <Navbar />
               {children}
-          </AuthProvider>
-          <Toaster position="top-center" />
-        </ThemeProvider>
+              <Toaster position="top-right" />
+            </ThemeProvider>
+          </SocketProvider>
+        </AuthProvider>
       </body>
     </html>
   );
