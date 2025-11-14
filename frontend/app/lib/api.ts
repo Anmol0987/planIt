@@ -22,9 +22,6 @@ api.interceptors.response.use(
     const store = useAuthStore.getState();
     const refreshToken = store.refreshToken;
 
-    console.log("inside interceptor response");
-    console.log("refreshToken before calling refresh:", refreshToken);
-
 
     if (originalRequest.url.includes("/auth/refresh")) {
       return Promise.reject(error);

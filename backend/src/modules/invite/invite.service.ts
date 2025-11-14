@@ -66,6 +66,9 @@ export const inviteService = {
     if (!invite || invite.expiresAt < new Date()) {
       throw new Error("Invalid or expired invite.");
     }
+    if (invite.accepted) {
+      throw new Error("Invite already accepted");
+    }
 
     const existing = await prisma.tripUser.findFirst({
       where: { userId, tripId: invite.tripId },
@@ -73,7 +76,7 @@ export const inviteService = {
     if (existing) {
       throw new Error("You are already part of this trip");
     }
-
+//add user to trip
     await prisma.tripUser.create({
       data: {
         tripId: invite.tripId,
@@ -81,7 +84,9 @@ export const inviteService = {
         role: Role.MEMBER,
       },
     });
+    getIO().to(invite.tripId).emit("trip:newMemberAdded", { userId });
 
+    // Mark invite accepted
     await prisma.invite.update({
       where: {
         id: invite.id,
@@ -90,7 +95,9 @@ export const inviteService = {
         accepted: true,
       },
     });
-    return "Joined trip successfully.";
+
+
+    return invite.tripId; 
   },
 
   async getTripInvites(userId: string, tripId: string): Promise<Invite[]> {

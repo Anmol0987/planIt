@@ -20,7 +20,7 @@ export const initSocket = (): Socket | null => {
   });
 
   socket.on("connect", () => {
-    console.log("connected to socket", socket?.id);
+    console.log("connected to socket");
   });
   socket.on("connect_error", (error) => {
     console.log("connect_error", error.message);

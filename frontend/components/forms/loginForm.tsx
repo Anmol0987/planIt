@@ -24,7 +24,7 @@ export default function LoginForm() {
   const {
     register,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting,errors },
   } = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
   });
@@ -41,51 +41,64 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-sm bg-background text-foreground">
-      <Card className="w-full max-w-md border border-muted shadow-md">
-        <CardHeader>
-          <CardTitle className="text-2xl font-semibold text-center">
-            Welcome Back
-          </CardTitle>
-        </CardHeader>
+    <div className="w-full max-w-md">
+    <Card className="border-border shadow-lg bg-gradient-card">
+      <CardHeader className="space-y-1 pb-6">
+        <CardTitle className="text-2xl font-semibold tracking-tight text-center">
+          Welcome back
+        </CardTitle>
+        <p className="text-sm text-muted-foreground text-center">
+          Enter your credentials to access your account
+        </p>
+      </CardHeader>
 
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Email Field */}
-            <div>
-              <Label htmlFor="email" className="text-sm font-medium">
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                {...register("email")}
-                className="mt-1"
-              />
-            </div>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          {/* Email Field */}
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-sm font-medium">
+              Email
+            </Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              className="h-10"
+              {...register("email")}
+            />
+            {errors.email && (
+              <p className="text-xs text-destructive">{errors.email.message}</p>
+            )}
+          </div>
 
-            {/* Password Field */}
-            <div>
-              <Label htmlFor="password" className="text-sm font-medium">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                {...register("password")}
-                className="mt-1"
-              />
-            </div>
+          {/* Password Field */}
+          <div className="space-y-2">
+            <Label htmlFor="password" className="text-sm font-medium">
+              Password
+            </Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              className="h-10"
+              {...register("password")}
+            />
+            {errors.password && (
+              <p className="text-xs text-destructive">{errors.password.message}</p>
+            )}
+          </div>
 
-            {/* Submit Button */}
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Logging in..." : "Login"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+          {/* Submit Button */}
+          <Button 
+            type="submit" 
+            className="w-full h-10 font-medium" 
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Signing in..." : "Sign in"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  </div>
   );
 }
