@@ -41,7 +41,7 @@ export default function TripForm({
   const onSubmit = async (data: TripData) => {
     try {
       console.log("trip create", data);
-      await api.post("/trip", data, { headers: { Authorization: token } });
+      await api.post("/trip", data);
       toast.success("Trip created successfully!");
 
       setOpen(false);

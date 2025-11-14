@@ -23,9 +23,7 @@ export default function Dashboard() {
 
     try {
       setLoading(true);
-      const res = await api.get("/trip", {
-        headers: { Authorization: token },
-      });
+      const res = await api.get("/trip");
       setTrips(res.data.data);
     } catch {
       toast.error("Failed to load trips");
