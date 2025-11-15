@@ -5,6 +5,8 @@ import { useState } from "react";
 import { api } from "@/app/lib/api";
 import { useAuthStore } from "@/app/lib/store";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import Link from "next/link";
 
 import TripInfoCard from "@/components/cards/TripInfoCard";
@@ -17,6 +19,12 @@ import { useItinerary } from "@/app/hooks/useItinerary";
 import ItinerarySection from "@/components/ItinerarySection";
 import toast from "react-hot-toast";
 import AddItineraryDialog from "@/components/dialogs/AddItineraryDialog";
+import {
+  CalendarIcon,
+  MailPlusIcon,
+  MessageSquareIcon,
+  UsersIcon,
+} from "lucide-react";
 
 export default function TripDetailsPage() {
   const { token, hydrated } = useAuthStore();
@@ -42,7 +50,7 @@ export default function TripDetailsPage() {
   const addItinerary = async (data: any) => {
     try {
       setLoadingAdd(true);
-      console.log("data=====",data)
+      console.log("data=====", data);
       await api.post(`/itinerary/create/${tripId}`, data);
 
       toast.success("Itinerary added");
@@ -102,10 +110,67 @@ export default function TripDetailsPage() {
           onInviteClick={() => setInviteOpen(true)}
         />
       </div>
+      <Tabs defaultValue="itinerary" className="w-full max-w-2xl mt-6">
+        <TabsList className="grid grid-cols-3 md:grid-cols-4 w-full">
+          <TabsTrigger value="itinerary">
+            <CalendarIcon className="w-4 h-4 mr-2" />
+            Itinerary
+          </TabsTrigger>
 
-      <ActiveMembers activeMembers={activeMembers} />
-      {isAdmin && <PendingInvites invites={invites} />}
+          <TabsTrigger value="members">
+            <UsersIcon className="w-4 h-4 mr-2" />
+            Members
+          </TabsTrigger>
 
+
+          <TabsTrigger value="chat">
+            <MessageSquareIcon className="w-4 h-4 mr-2" />
+            Chat
+          </TabsTrigger>
+          {isAdmin && (
+            <TabsTrigger value="invites">
+              <MailPlusIcon className="w-4 h-4 mr-2" />
+              Invites
+            </TabsTrigger>
+          )}
+        </TabsList>
+
+        <TabsContent
+          value="itinerary"
+          className="animate-in fade-in-50 duration-300"
+        >
+          <ItinerarySection
+            itinerary={itinerary}
+            isAdmin={isAdmin}
+            onAdd={() => setAddOpen(true)}
+          />
+        </TabsContent>
+
+        <TabsContent
+          value="members"
+          className="animate-in fade-in-50 duration-300"
+        >
+          <ActiveMembers activeMembers={activeMembers} />
+        </TabsContent>
+        <TabsContent
+          value="chat"
+          className="animate-in fade-in-50 duration-300"
+        >
+          <h2 className="flex justify-center items-center">coming Soon !!</h2>
+        </TabsContent>
+
+        {isAdmin && (
+          <TabsContent
+            value="invites"
+            className="animate-in fade-in-50 duration-300"
+          >
+            <PendingInvites invites={invites} />
+            <Button onClick={() => setInviteOpen(true)} className="mt-3">
+              Send Invite
+            </Button>
+          </TabsContent>
+        )}
+      </Tabs>
       <InviteDialog
         open={inviteOpen}
         setOpen={setInviteOpen}
@@ -113,11 +178,6 @@ export default function TripDetailsPage() {
         setInviteEmail={setInviteEmail}
         sending={sending}
         onSend={sendInvite}
-      />
-      <ItinerarySection
-        itinerary={itinerary}
-        isAdmin={isAdmin}
-        onAdd={() => setAddOpen(true)}
       />
 
       <AddItineraryDialog

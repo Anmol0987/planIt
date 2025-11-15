@@ -15,7 +15,14 @@ export default function InviteDialog({
   setInviteEmail,
   sending,
   onSend,
-}: any) {
+}: {open:boolean,
+  setOpen:(value:boolean)=>void
+  inviteEmail:string,
+  setInviteEmail:(value:string)=>void,
+  sending:boolean,
+  onSend:()=>void
+
+}) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild></DialogTrigger>
