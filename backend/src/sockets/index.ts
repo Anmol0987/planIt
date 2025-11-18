@@ -34,12 +34,14 @@ export const setupSocketServer = (server: http.Server): Server => {
       const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET) as {
         userId: string;
         email?: string;
+        name?:string;
         iat?: number;
         exp?: number;
       };
       socket.data.user =  {
         userId: decoded.userId,
         email: decoded.email,
+        name:decoded.name
       };
       next();
     } catch {

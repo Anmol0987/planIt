@@ -24,3 +24,26 @@
 * {
   @apply transition-colors duration-300;
 }
+
+@keyframes typingDot {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.animate-typingDot {
+  animation: typingDot 0.9s infinite ease-in-out;
+}
+
+.animation-delay-150 {
+  animation-delay: 150ms;
+}
+
+.animation-delay-300 {
+  animation-delay: 300ms;
+}

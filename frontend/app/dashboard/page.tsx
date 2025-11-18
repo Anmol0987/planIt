@@ -47,7 +47,7 @@ export default function Dashboard() {
         {/* Header */}
         <header className="flex items-center justify-between">
           <h2 className="text-2xl font-semibold tracking-tight">
-            Welcome, {user?.email?.split("@")[0] || "Traveler ✈️"}
+            Welcome, {user?.name || "Traveler ✈️"}
           </h2>
 
           <TripForm onTripCreated={() => fetchTrips()} />

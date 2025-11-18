@@ -3,8 +3,9 @@ import { persist } from "zustand/middleware";
 import { api } from "@/app/lib/api";
 
 type User = {
-  id: string;
+  userId: string;
   email: string;
+  name:string
 };
 
 export type AuthState = {

@@ -25,14 +25,15 @@ import {
   MessageSquareIcon,
   UsersIcon,
 } from "lucide-react";
+import ChatSection from "@/components/ChatSection";
 
 export default function TripDetailsPage() {
+  
   const { token, hydrated } = useAuthStore();
   const { tripId } = useParams<{ tripId: string }>();
   const { trip, invites, setInvites, loading, isAdmin } = useTripData(tripId);
 
   const { activeMembers } = useTripSocket(tripId, setInvites);
-
   const { itinerary, loading: itineraryLoading } = useItinerary(
     tripId,
     token,
@@ -156,7 +157,7 @@ export default function TripDetailsPage() {
           value="chat"
           className="animate-in fade-in-50 duration-300"
         >
-          <h2 className="flex justify-center items-center">coming Soon !!</h2>
+          <ChatSection tripId={tripId} />
         </TabsContent>
 
         {isAdmin && (

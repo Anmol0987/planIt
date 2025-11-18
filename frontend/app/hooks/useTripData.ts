@@ -13,7 +13,7 @@ export function useTripData(tripId: string | undefined) {
   const [loading, setLoading] = useState(false);
 
   const isAdmin = trip?.members?.some(
-    (m: any) => m.userId === user?.id && m.role === "ADMIN"
+    (m: any) => m.userId === user?.userId && m.role === "ADMIN"
   );
 
   const fetchInvites = async () => {

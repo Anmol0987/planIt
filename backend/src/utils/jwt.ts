@@ -6,14 +6,14 @@ import { env } from "../config/env";
  * @param {object} payload
  * @returns {any}
  */
-export const signAccessToken = (payload: object): string => {
+export const signAccessToken = (payload: { userId: string; email: string,name:string }): string => {
   return jwt.sign(payload, env.JWT_ACCESS_SECRET as jwt.Secret, {
     expiresIn: env.ACCESS_TOKEN_EXP as jwt.SignOptions["expiresIn"],
   });
 };
 
 
-export const signRefreshToken = (payload: { userId: string; email: string }) => {
+export const signRefreshToken = (payload: { userId: string; email: string,name:string }) => {
   return jwt.sign(payload, env.JWT_REFRESH_SECRET, {
     expiresIn: "30d",
   });

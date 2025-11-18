@@ -6,7 +6,12 @@ import { useSocket } from "@/app/providers/SocketProvider";
 
 export function useTripSocket(tripId: string | undefined, setInvites: any) {
   const socket = useSocket();
-  const [activeMembers, setActiveMembers] = useState<string[]>([]);
+  type Member = {
+    userId: string;
+    name: string;
+    email: string;
+  };
+  const [activeMembers, setActiveMembers] = useState<Member[]>([]);
 
   useEffect(() => {
     if (!socket || !tripId) return;
@@ -16,11 +21,11 @@ export function useTripSocket(tripId: string | undefined, setInvites: any) {
     socket.emit("joinTrip", tripId);
 
     socket.on("trip:memberJoined", (data) => {
-      if (!unmounted) toast.success(`${data.email} joined this trip`);
+      if (!unmounted) toast.success(`${data.name} joined this trip`);
     });
 
     socket.on("trip:memberLeft", (data) => {
-      if (!unmounted) toast.success(`${data.email} left the trip`);
+      if (!unmounted) toast.success(`${data.name} left the trip`);
     });
 
     socket.on("trip:membersUpdate", (data) => {

@@ -83,7 +83,7 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
     const decoded = verifyRefreshToken(token);
     if (!decoded)
       return res.status(401).json({ message: "Invalid refresh token" });
-    const payload = decoded as JwtPayload & { userId: string; email?: string };
+    const payload = decoded as JwtPayload & { userId: string; email?: string,name:string };
 
     const stored = await prisma.refreshToken.findUnique({ where: { token } });
     if (!stored || stored.revoked || stored.expiresAt < new Date()) {
@@ -94,11 +94,14 @@ export const refreshAccessToken = async (req: Request, res: Response) => {
 
     const newAccessToken = signAccessToken({
       userId: payload.userId,
-      email: payload.email,
+      email: payload.email!,
+      name:payload.name
+
     });
     const newRefreshToken = signRefreshToken({
       userId: payload.userId,
       email: payload.email!,
+      name:payload.name
     });
     await prisma.refreshToken.update({
       where: { token },
