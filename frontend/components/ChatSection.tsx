@@ -51,7 +51,7 @@ export default function ChatSection({ tripId }: { tripId: string }) {
         {/* Messages */}
         <div className="flex-1 overflow-y-auto pr-1 space-y-4 p-2">
           {messages.map((msg, idx) => {
-            const isMe = msg.userId === user?.userId;
+            const isMe = msg.userId === user?.id;
 
             return (
               <div

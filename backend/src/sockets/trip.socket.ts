@@ -36,11 +36,9 @@ export function setupTripSocket(io: Server, socket: Socket): void {
    * @param tripId - The ID of the trip/room to join.
    */
   socket.on("joinTrip", (tripId: string) => {
-    //checks if tripId is there or not
-    if (typeof tripId !== "string" || !tripId.trim()) {
-      socket.emit("error", { message: "Invalid trip ID." });
-      return;
-    }
+    if (!socket.data.trips) socket.data.trips = new Set();
+    socket.data.trips.add(tripId);
+    socket.join(tripId);
 
     //if new trip id create a new empty set
     if (!activeMembers.has(tripId)) {
@@ -48,15 +46,18 @@ export function setupTripSocket(io: Server, socket: Socket): void {
     }
 
     //add current user to actrive members
-    activeMembers
-      .get(tripId)!
-      .add({ userId: user.userId, email: user.email, name: user.name });
+    activeMembers.get(tripId)!.add({
+      userId: user.userId,
+      email: user.email,
+      name: user.name,
+    });
 
     // Adds the socket to the specified trip room, enabling it to receive events broadcast to that room.
-    socket.join(tripId);
+    // socket.join(tripId);
 
     // Notify other members in the trip
     socket.to(tripId).emit("trip:memberJoined", {
+      tripId,
       userId: user.userId,
       email: user.email,
       name: user.name,
@@ -65,6 +66,7 @@ export function setupTripSocket(io: Server, socket: Socket): void {
 
     // This emits an updated list of all active members in the trip to everyone in the trip room.
     io.to(tripId).emit("trip:membersUpdate", {
+      tripId,
       members: Array.from(activeMembers.get(tripId)!),
     });
   });
@@ -74,25 +76,28 @@ export function setupTripSocket(io: Server, socket: Socket): void {
 
     // Removes the socket from the specified trip room.
     socket.leave(tripId);
+    socket.data.trips?.delete(tripId);
+
     console.log(`👋 ${user.name} left trip ${tripId}`);
 
     // remove the user from active members list
     const members = activeMembers.get(tripId);
     if (members) {
-      // Remove user by userId
-      activeMembers.set(
-        tripId,
-        new Set([...members].filter((m) => m.userId !== user.userId))
+      const newSet = new Set(
+        [...members].filter((m) => m.userId !== user.userId)
       );
+      activeMembers.set(tripId, newSet);
     }
 
     // This emits an updated list of all active members in the trip to everyone in the trip room.
     io.to(tripId).emit("trip:membersUpdate", {
+      tripId,
       members: Array.from(activeMembers.get(tripId) || []),
     });
 
     //notify other user that the user has left
     socket.to(tripId).emit("trip:memberLeft", {
+      tripId,
       userId: user.userId,
       email: user.email,
       name: user.name,
@@ -100,16 +105,22 @@ export function setupTripSocket(io: Server, socket: Socket): void {
     });
   });
   socket.on("disconnect", () => {
-    const userId = user.userId;
-    activeMembers.forEach((members, tripId) => {
+    if (!socket.data.trips) return;
+
+    socket.data.trips.forEach((tripId: string) => {
+      const members = activeMembers.get(tripId);
+      if (!members) return;
+
       const newSet = new Set(
         [...members].filter((m) => m.userId !== user.userId)
       );
       activeMembers.set(tripId, newSet);
       io.to(tripId).emit("trip:membersUpdate", {
+        tripId,
         members: Array.from(newSet),
       });
       socket.to(tripId).emit("trip:memberLeft", {
+        tripId,
         userId: user.userId,
         email: user.email,
         name: user.name,
@@ -123,6 +134,7 @@ export function setupTripSocket(io: Server, socket: Socket): void {
 
     // notify everyone in the trip room
     io.to(tripId).emit("trip:inviteCreated", {
+      tripId,
       email,
       invitedBy: user.email,
       invitedByName: user.name,
@@ -139,18 +151,20 @@ export function setupTripSocket(io: Server, socket: Socket): void {
       timestamp: Date.now(),
     };
     // Broadcast to all in room INCLUDING sender
-    io.to(tripId).emit("trip:newMessage", chatMessage);
+    io.to(tripId).emit("trip:newMessage", { tripId, ...chatMessage });
   });
 
   socket.on("trip:typing", ({ tripId }) => {
     socket.to(tripId).emit("trip:userTyping", {
+      tripId,
       userId: user.userId,
       name: user.name,
     });
   });
-  
+
   socket.on("trip:stopTyping", ({ tripId }) => {
     socket.to(tripId).emit("trip:userStopTyping", {
+      tripId,
       userId: user.userId,
     });
   });

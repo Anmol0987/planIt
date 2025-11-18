@@ -3,6 +3,7 @@ import http from "http";
 import { env } from "../config/env";
 import jwt from "jsonwebtoken";
 import { setupTripSocket } from "./trip.socket";
+import cookie from "cookie";
 
 let io: Server | undefined;
 
@@ -23,20 +24,23 @@ export const setupSocketServer = (server: http.Server): Server => {
 
   io.use((socket: Socket, next) => {
     try {
-      const token: string | undefined =
-        (socket.handshake.auth?.token as string | undefined) ||
-        (socket.handshake.query?.token as string | undefined);
-
-      if (!token) {
-        return next(new Error("No token provided"));
+      const rawCookieHeader = socket.handshake.headers.cookie;
+      if (!rawCookieHeader) {
+        return next(new Error("No cookies provided"));
       }
+  
+      const cookies = cookie.parse(rawCookieHeader);
+  
+      const token = cookies.token; 
+      if (!token) {
+        return next(new Error("Auth cookie missing"));
+      }
+  
 
       const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET) as {
         userId: string;
         email?: string;
         name?:string;
-        iat?: number;
-        exp?: number;
       };
       socket.data.user =  {
         userId: decoded.userId,

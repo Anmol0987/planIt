@@ -36,7 +36,7 @@ export const registerUser = async (
   }
 };
 
-export const loginUser = async (password: string, email: string): Promise<{user: User, accessToken: string, refreshToken: string}> => {
+export const loginUser = async (password: string, email: string): Promise<{user: User, accessToken: string}> => {
   try {
     const user = await prisma.user.findUnique({
       where: { email },
@@ -47,16 +47,16 @@ export const loginUser = async (password: string, email: string): Promise<{user:
     if (!valid) throw new Error("Invalid credentials");
 
     const accessToken = signAccessToken({ userId: user.id,email:user.email ,name:user.name});
-    const refreshToken = signRefreshToken({ userId: user.id,email:user.email,name:user.name });
+    // const refreshToken = signRefreshToken({ userId: user.id,email:user.email,name:user.name });
 
-    await prisma.refreshToken.create({
-      data: {
-        userId: user.id,
-        token: refreshToken,
-        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30), //30 days expiery,
-      },
-    });
-    return {user,accessToken,refreshToken}
+    // await prisma.refreshToken.create({
+    //   data: {
+    //     userId: user.id,
+    //     token: refreshToken,
+    //     expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30), //30 days expiery,
+    //   },
+    // });
+    return {user,accessToken}
   } catch (e) {
     console.error("Error in loginUser:", e as Error );
 

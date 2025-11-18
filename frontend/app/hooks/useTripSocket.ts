@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useSocket } from "@/app/providers/SocketProvider";
 
@@ -15,36 +15,47 @@ export function useTripSocket(tripId: string | undefined, setInvites: any) {
 
   useEffect(() => {
     if (!socket || !tripId) return;
-
-    let unmounted = false;
-
+    socket.off("trip:memberJoined");
+    socket.off("trip:memberLeft");
+    socket.off("trip:membersUpdate");
+    socket.off("trip:inviteCreated");
     socket.emit("joinTrip", tripId);
 
-    socket.on("trip:memberJoined", (data) => {
-      if (!unmounted) toast.success(`${data.name} joined this trip`);
-    });
+    const handleJoined = (data: any) => {
+      if (data.tripId !== tripId) return;
+      toast.success(`${data.name} joined this trip`);
+    };
 
-    socket.on("trip:memberLeft", (data) => {
-      if (!unmounted) toast.success(`${data.name} left the trip`);
-    });
+    const handleLeft = (data: any) => {
+      if (data.tripId !== tripId) return;
+      toast.success(`${data.name} left the trip`);
+    };
 
-    socket.on("trip:membersUpdate", (data) => {
+    const handleMembersUpdate = (data: any) => {
+      if (data.tripId !== tripId) return;
       setActiveMembers(data.members);
-    });
+    };
 
-    socket.on("trip:inviteCreated", (invite) => {
+    const handleInvite = (invite: any) => {
+      if (invite.tripId !== tripId) return;
       setInvites((prev: any[]) => [...prev, invite]);
       toast.success(`Invite sent to ${invite.email}`);
-    });
+    };
+    socket.on("trip:memberJoined", handleJoined);
+    socket.on("trip:memberLeft", handleLeft);
+    socket.on("trip:membersUpdate", handleMembersUpdate);
+    socket.on("trip:inviteCreated", handleInvite);
+
 
     return () => {
-      unmounted = true;
 
       socket.emit("leaveTrip", tripId);
-      socket.off("trip:memberJoined");
-      socket.off("trip:memberLeft");
-      socket.off("trip:membersUpdate");
-      socket.off("trip:inviteCreated");
+   
+      socket.off("trip:memberJoined", handleJoined);
+      socket.off("trip:memberLeft", handleLeft);
+      socket.off("trip:membersUpdate", handleMembersUpdate);
+      socket.off("trip:inviteCreated", handleInvite);
+
     };
   }, [socket, tripId]);
 

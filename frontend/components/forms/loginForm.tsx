@@ -7,7 +7,7 @@ import { api } from "@/app/lib/api";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { loginSchema } from "@/app/utils/validate";
-import { AuthState, useAuthStore } from "@/app/lib/store";
+import { useAuthStore } from "@/app/lib/store";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,7 @@ type LoginData = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
   const router = useRouter();
-  const setAuth = useAuthStore((s: AuthState) => s.setAuth);
+  const setUser = useAuthStore((s) => s.setUser);
 
   const {
     register,
@@ -32,7 +32,7 @@ export default function LoginForm() {
   const onSubmit = async (data: LoginData) => {
     try {
       const res = await api.post("/auth/signin", data);
-      setAuth(res.data.user, res.data.accessToken,res.data.refreshToken);
+      setUser(res.data.user);
       toast.success("Welcome back!");
       router.push("/dashboard");
     } catch (err: any) {

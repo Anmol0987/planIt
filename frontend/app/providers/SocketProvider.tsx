@@ -17,12 +17,11 @@ export default function SocketProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { token, hydrated } = useAuthStore();
+  const { user } = useAuthStore();
   const [socket, setSocket] = useState<SocketContextType>(null);
 
   useEffect(() => {
-    if (!hydrated) return;
-    if (!token) {
+    if (!user) {
       closeSocket();
       setSocket(null);
       return;
@@ -33,7 +32,7 @@ export default function SocketProvider({
       closeSocket();
       setSocket(null);
     };
-  }, [token, hydrated]);
+  }, [user]);
   return (
     <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
   );

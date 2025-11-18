@@ -49,20 +49,17 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const data = signInSchema.parse(req.body);
 
-    const { accessToken, refreshToken, user } = await loginUser(
+    const { accessToken, user } = await loginUser(
       data.password,
       data.email
     );
-    res.status(200).json({
-      success: true,
-      accessToken,
-      refreshToken,
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-      },
+
+    res.cookie("token", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
     });
+     res.status(200).json({ user });
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       res.status(400).json({ success: false, errors: error.issues });
@@ -73,53 +70,64 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const refreshAccessToken = async (req: Request, res: Response) => {
-  console.log("inside refresh token ig", req.body);
-  try {
-    const token = req.body.refreshToken;
-    if (!token)
-      return res.status(401).json({ message: "Missing refresh token" });
+// export const refreshAccessToken = async (req: Request, res: Response) => {
+//   console.log("inside refresh token ig", req.body);
+//   try {
+//     const token = req.body.refreshToken;
+//     if (!token)
+//       return res.status(401).json({ message: "Missing refresh token" });
 
-    const decoded = verifyRefreshToken(token);
-    if (!decoded)
-      return res.status(401).json({ message: "Invalid refresh token" });
-    const payload = decoded as JwtPayload & { userId: string; email?: string,name:string };
+//     const decoded = verifyRefreshToken(token);
+//     if (!decoded)
+//       return res.status(401).json({ message: "Invalid refresh token" });
+//     const payload = decoded as JwtPayload & { userId: string; email?: string,name:string };
 
-    const stored = await prisma.refreshToken.findUnique({ where: { token } });
-    if (!stored || stored.revoked || stored.expiresAt < new Date()) {
-      return res
-        .status(401)
-        .json({ message: "Refresh token expired or revoked" });
-    }
+//     const stored = await prisma.refreshToken.findUnique({ where: { token } });
+//     if (!stored || stored.revoked || stored.expiresAt < new Date()) {
+//       return res
+//         .status(401)
+//         .json({ message: "Refresh token expired or revoked" });
+//     }
 
-    const newAccessToken = signAccessToken({
-      userId: payload.userId,
-      email: payload.email!,
-      name:payload.name
+//     const newAccessToken = signAccessToken({
+//       userId: payload.userId,
+//       email: payload.email!,
+//       name:payload.name
 
-    });
-    const newRefreshToken = signRefreshToken({
-      userId: payload.userId,
-      email: payload.email!,
-      name:payload.name
-    });
-    await prisma.refreshToken.update({
-      where: { token },
-      data: { revoked: true },
-    });
-    await prisma.refreshToken.create({
-      data: {
-        userId: payload.userId,
-        token: newRefreshToken,
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-      },
-    });
+//     });
+//     const newRefreshToken = signRefreshToken({
+//       userId: payload.userId,
+//       email: payload.email!,
+//       name:payload.name
+//     });
+//     await prisma.refreshToken.update({
+//       where: { token },
+//       data: { revoked: true },
+//     });
+//     await prisma.refreshToken.create({
+//       data: {
+//         userId: payload.userId,
+//         token: newRefreshToken,
+//         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+//       },
+//     });
 
-    return res
-      .status(200)
-      .json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
-  } catch (err) {
-    console.error("Error refreshing access token:", err);
-    return res.status(500).json({ message: "Internal server error" });
+//     return res
+//       .status(200)
+//       .json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
+//   } catch (err) {
+//     console.error("Error refreshing access token:", err);
+//     return res.status(500).json({ message: "Internal server error" });
+//   }
+// };
+export const getMe = (req:Request, res:Response) => {
+
+  if (!req.user) {
+    return res.status(401).json({ message: "Not authenticated" });
   }
+
+  return res.status(200).json({
+    success: true,
+    user: req.user,
+  });
 };

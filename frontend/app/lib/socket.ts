@@ -4,18 +4,12 @@ import { useAuthStore } from "./store";
 let socket: Socket | null = null;
 
 export const initSocket = (): Socket | null => {
-  const { token } = useAuthStore.getState();
-
-  if (!token) {
-    console.log("no token found");
-    return null;
-  }
-  if (socket && socket.connected) return socket;
+  if (socket) return socket;
 
   const backend = "http://localhost:3000";
 
   socket = io(backend, {
-    auth: { token },
+    withCredentials: true,  
     transports: ["websocket"],
   });
 

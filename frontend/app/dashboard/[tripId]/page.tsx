@@ -1,7 +1,7 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { api } from "@/app/lib/api";
 import { useAuthStore } from "@/app/lib/store";
 import { Button } from "@/components/ui/button";
@@ -28,37 +28,31 @@ import {
 import ChatSection from "@/components/ChatSection";
 
 export default function TripDetailsPage() {
-  
-  const { token, hydrated } = useAuthStore();
+  const router = useRouter();
   const { tripId } = useParams<{ tripId: string }>();
-  const { trip, invites, setInvites, loading, isAdmin } = useTripData(tripId);
+  const { user, setUser } = useAuthStore();
 
+
+  const { trip, invites, setInvites, loading, isAdmin } = useTripData(tripId);
   const { activeMembers } = useTripSocket(tripId, setInvites);
-  const { itinerary, loading: itineraryLoading } = useItinerary(
-    tripId,
-    token,
-    hydrated
-  );
+  const { itinerary, loading: itineraryLoading } = useItinerary(tripId);
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [sending, setSending] = useState(false);
 
-  const [itineraryData, setItineraryData] = useState([]);
   const [addOpen, setAddOpen] = useState(false);
   const [loadingAdd, setLoadingAdd] = useState(false);
 
   const addItinerary = async (data: any) => {
     try {
       setLoadingAdd(true);
-      console.log("data=====", data);
       await api.post(`/itinerary/create/${tripId}`, data);
-
       toast.success("Itinerary added");
       setAddOpen(false);
-      setLoadingAdd(false);
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to add itinerary");
+    } finally {
       setLoadingAdd(false);
     }
   };
@@ -69,31 +63,29 @@ export default function TripDetailsPage() {
       await api.post(`/invite/${tripId}`, { email: inviteEmail });
       setInviteEmail("");
       setInviteOpen(false);
+      toast.success("Invite sent!");
     } finally {
       setSending(false);
     }
   };
-  if (!hydrated) {
+
+  // Loading user?
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        Loading...
+        Loading…
       </div>
     );
   }
 
-  if (!token) {
+  // Loading trip or itinerary
+  if (loading || !trip || itineraryLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        Authenticating...
+        Loading trip…
       </div>
     );
   }
-  if (loading || !trip || itineraryLoading)
-    return (
-      <div className="flex justify-center items-center w-full h-min-screen">
-        Loading...
-      </div>
-    );
 
   return (
     <main className="min-h-screen flex flex-col items-center py-10 px-4 bg-background text-foreground">
@@ -111,6 +103,7 @@ export default function TripDetailsPage() {
           onInviteClick={() => setInviteOpen(true)}
         />
       </div>
+
       <Tabs defaultValue="itinerary" className="w-full max-w-2xl mt-6">
         <TabsList className="grid grid-cols-3 md:grid-cols-4 w-full">
           <TabsTrigger value="itinerary">
@@ -123,11 +116,11 @@ export default function TripDetailsPage() {
             Members
           </TabsTrigger>
 
-
           <TabsTrigger value="chat">
             <MessageSquareIcon className="w-4 h-4 mr-2" />
             Chat
           </TabsTrigger>
+
           {isAdmin && (
             <TabsTrigger value="invites">
               <MailPlusIcon className="w-4 h-4 mr-2" />
@@ -136,10 +129,8 @@ export default function TripDetailsPage() {
           )}
         </TabsList>
 
-        <TabsContent
-          value="itinerary"
-          className="animate-in fade-in-50 duration-300"
-        >
+        {/* Itinerary */}
+        <TabsContent value="itinerary">
           <ItinerarySection
             itinerary={itinerary}
             isAdmin={isAdmin}
@@ -147,31 +138,28 @@ export default function TripDetailsPage() {
           />
         </TabsContent>
 
-        <TabsContent
-          value="members"
-          className="animate-in fade-in-50 duration-300"
-        >
+        {/* Members */}
+        <TabsContent value="members">
           <ActiveMembers activeMembers={activeMembers} />
         </TabsContent>
-        <TabsContent
-          value="chat"
-          className="animate-in fade-in-50 duration-300"
-        >
+
+        {/* Chat */}
+        <TabsContent value="chat">
           <ChatSection tripId={tripId} />
         </TabsContent>
 
+        {/* Invites */}
         {isAdmin && (
-          <TabsContent
-            value="invites"
-            className="animate-in fade-in-50 duration-300"
-          >
+          <TabsContent value="invites">
             <PendingInvites invites={invites} />
-            <Button onClick={() => setInviteOpen(true)} className="mt-3">
+            <Button className="mt-3" onClick={() => setInviteOpen(true)}>
               Send Invite
             </Button>
           </TabsContent>
         )}
       </Tabs>
+
+      {/* Invite Dialog */}
       <InviteDialog
         open={inviteOpen}
         setOpen={setInviteOpen}
@@ -181,6 +169,7 @@ export default function TripDetailsPage() {
         onSend={sendInvite}
       />
 
+      {/* Add Itinerary Dialog */}
       <AddItineraryDialog
         open={addOpen}
         setOpen={setAddOpen}
