@@ -115,7 +115,7 @@ export default function Dashboard() {
                             backgroundImage: `url('/card-bg.jpeg')`,
                           }}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-tr from-black/60 via-black/20 to-transparent" />
                       </div>
 
                       <div className="relative z-10 p-5 flex flex-col gap-3">
@@ -142,10 +142,10 @@ export default function Dashboard() {
 
                             <DropdownMenuContent
                               align="end"
-                              className="w-36 backdrop-blur-xl bg-card text-card-foreground"
+                              className=" backdrop-blur-xl bg-neutral-50 text-card-foreground"
                             >
                               <DropdownMenuItem
-                                className="flex items-center gap-2"
+                                className="flex items-center gap-2 hover:bg-neutral-200 cursor-pointer"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setEditTrip(t);
@@ -156,7 +156,7 @@ export default function Dashboard() {
                               </DropdownMenuItem>
 
                               <DropdownMenuItem
-                                className="flex items-center gap-2 text-destructive-foreground"
+                                className="flex items-center gap-2 text-red-700 hover:bg-neutral-200 cursor-pointer"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   deleteTrip(t.id);

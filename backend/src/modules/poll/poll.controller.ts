@@ -99,8 +99,8 @@ export const closePollById=async(req:Request,res:Response)=>{
 
     try {
         const userId = req.user?.id;
-        const pollId = req.params.pollId;
-    
+        const pollId = req.params.id;
+        
         if (!userId || !pollId) {
           return res
             .status(400)

@@ -26,5 +26,9 @@ app.get("/", (_, res) => res.send("PlanIt Backend Running "));
 export default app;
 
 
-
+// POST   /api/trips/[tripId]/polls          -> create poll done
+// GET    /api/trips/[tripId]/polls          -> get all polls for trip done
+// GET    /api/polls/[pollId]                -> get poll details done
+// POST   /api/polls/[pollId]/vote           -> vote done
+// DELETE /api/polls/[pollId]                -> delete poll
 // PATCH  /api/polls/[pollId]/close          -> close poll

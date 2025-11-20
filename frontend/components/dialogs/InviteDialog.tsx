@@ -31,7 +31,7 @@ export default function InviteDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild></DialogTrigger>
 
-      <DialogContent className="sm:max-w-md rounded-xl border border-border bg-background text-card-foreground shadow-xl">
+      <DialogContent className="sm:max-w-md rounded-xl border border-border shadow-xl">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">
             Invite Member

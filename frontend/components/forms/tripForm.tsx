@@ -56,7 +56,7 @@ export default function TripForm({ onTripCreated }: TripFormProps) {
         <Button variant="default" onClick={() => setOpen(true)}>+ New Trip</Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-md rounded-xl border border-border bg-card text-card-foreground shadow-xl">
+      <DialogContent className="sm:max-w-md rounded-xl border border-border shadow-xl">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">Create a Trip</DialogTitle>
         </DialogHeader>

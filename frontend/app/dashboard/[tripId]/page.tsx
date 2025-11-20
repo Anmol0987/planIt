@@ -106,7 +106,7 @@ export default function TripDetailsPage() {
       </div>
 
       <Tabs defaultValue="itinerary" className="w-full max-w-3xl mt-6">
-        <TabsList className="grid grid-cols-3 md:grid-cols-5 w-full gap-3 bg-muted text-foreground mb-2">
+        <TabsList className="grid grid-cols-3 md:grid-cols-4 w-full gap-3 bg-muted text-foreground mb-2">
           <TabsTrigger value="itinerary" className="text-sm flex items-center">
             <CalendarIcon className="w-4 h-4 mr-1" />
             Itinerary
@@ -126,12 +126,6 @@ export default function TripDetailsPage() {
             Poll
           </TabsTrigger>
 
-          {isAdmin && (
-            <TabsTrigger value="invites" className="text-sm flex items-center">
-              <MailPlusIcon className="w-4 h-4 mr-1" />
-              Invites
-            </TabsTrigger>
-          )}
         </TabsList>
 
         <TabsContent value="itinerary" className="pt-4">
@@ -150,17 +144,9 @@ export default function TripDetailsPage() {
           <ChatSection tripId={tripId} />
         </TabsContent>
         <TabsContent value="polls" className="pt-4">
-          <PollSection />
+          <PollSection tripId={tripId} />
         </TabsContent>
 
-        {isAdmin && (
-          <TabsContent value="invites" className="pt-4">
-            <PendingInvites invites={invites} />
-            <Button className="mt-4 w-full" onClick={() => setInviteOpen(true)}>
-              Send Invite
-            </Button>
-          </TabsContent>
-        )}
       </Tabs>
 
       <InviteDialog

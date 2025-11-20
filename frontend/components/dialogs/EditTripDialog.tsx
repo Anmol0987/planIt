@@ -47,7 +47,7 @@ export default function EditTripDialog({ open, setOpen, trip, onSuccess }: any) 
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-md rounded-xl border border-border bg-card text-card-foreground shadow-xl backdrop-blur-md">
+      <DialogContent className="max-w-md rounded-xl border border-border shadow-xl backdrop-blur-md">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold">Edit Trip</DialogTitle>
         </DialogHeader>
