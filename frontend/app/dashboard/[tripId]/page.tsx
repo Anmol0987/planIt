@@ -26,6 +26,7 @@ import {
   UsersIcon,
 } from "lucide-react";
 import ChatSection from "@/components/ChatSection";
+import PollSection from "@/components/PollSection";
 
 export default function TripDetailsPage() {
   const router = useRouter();
@@ -105,7 +106,7 @@ export default function TripDetailsPage() {
       </div>
 
       <Tabs defaultValue="itinerary" className="w-full max-w-3xl mt-6">
-        <TabsList className="grid grid-cols-3 md:grid-cols-4 w-full bg-muted text-foreground">
+        <TabsList className="grid grid-cols-3 md:grid-cols-5 w-full gap-3 bg-muted text-foreground mb-2">
           <TabsTrigger value="itinerary" className="text-sm flex items-center">
             <CalendarIcon className="w-4 h-4 mr-1" />
             Itinerary
@@ -119,6 +120,10 @@ export default function TripDetailsPage() {
           <TabsTrigger value="chat" className="text-sm flex items-center">
             <MessageSquareIcon className="w-4 h-4 mr-1" />
             Chat
+          </TabsTrigger>
+          <TabsTrigger value="polls" className="text-sm flex items-center">
+            <MessageSquareIcon className="w-4 h-4 mr-1" />
+            Poll
           </TabsTrigger>
 
           {isAdmin && (
@@ -143,6 +148,9 @@ export default function TripDetailsPage() {
 
         <TabsContent value="chat" className="pt-4">
           <ChatSection tripId={tripId} />
+        </TabsContent>
+        <TabsContent value="polls" className="pt-4">
+          <PollSection />
         </TabsContent>
 
         {isAdmin && (

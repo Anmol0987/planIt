@@ -48,16 +48,58 @@ export const deleteById = async (tripId: string) => {
   });
 };
 
-export const updateById = async (tripId: string,data:any) => {
-  try{const updated= await prisma.trip.update({ where: { id: tripId } ,data:{
-    name:data.name,
-    destination:data.destination ,
-    startDate:  new Date(data.startDate),
-    endDate:new Date(data.endDate)
-  }});
-  console.log("inside service",updated)
-  return updated;}
-  catch(e:any){
-    console.log("error",e.message)
+export const updateById = async (tripId: string, data: any) => {
+  try {
+    const updated = await prisma.trip.update({
+      where: { id: tripId },
+      data: {
+        name: data.name,
+        destination: data.destination,
+        startDate: new Date(data.startDate),
+        endDate: new Date(data.endDate),
+      },
+    });
+    console.log("inside service", updated);
+    return updated;
+  } catch (e: any) {
+    console.log("error", e.message);
+  }
+};
+
+export const createPollService = async (
+  userId: string,
+  tripId: string,
+  data: any
+) => {
+  try {
+    const poll = await prisma.poll.create({
+      data: {
+        createdBy: userId!,
+        tripId,
+        question: data.question,
+        type: data.type,
+        options: {
+          create: data.options.map((text: string) => ({ text })),
+        },
+        isClosed: false,
+      },
+      include: { options: true },
+    });
+    return poll;
+  } catch (e: any) {
+    console.log("error", e.message);
+  }
+};
+
+export const getPollService = async (tripId: string) => {
+  try {
+    const polls = await prisma.poll.findMany({
+      where: { tripId },
+      include: { options: true, votes: true },
+    });
+    return polls;
+  } catch (err) {
+    console.error("getPollService error:", err);
+    throw err;
   }
 };

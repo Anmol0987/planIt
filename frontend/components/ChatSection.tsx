@@ -34,11 +34,8 @@ export default function ChatSection({ tripId }: { tripId: string }) {
           "
         ></div>
 
-        {/* Soft dim layer for better blur */}
-        {/* <div className="absolute inset-0 bg-white/40 dark:bg-black/30"></div> */}
       </div>
 
-      {/* Main frosted chat container */}
       <div
         className="
           relative flex flex-col h-full rounded-2xl p-4 

@@ -8,15 +8,15 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(uuid())
-  name          String
-  email         String         @unique
-  passwordHash  String
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id           String     @id @default(uuid())
+  name         String
+  email        String     @unique
+  passwordHash String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
   // refreshTokens RefreshToken[]
-  trips         TripUser[]
-  createdTrips  Trip[]
+  trips        TripUser[]
+  createdTrips Trip[]
 }
 
 // model RefreshToken {
@@ -30,18 +30,19 @@ model User {
 // }
 
 model Trip {
-  id          String     @id @default(uuid())
+  id          String      @id @default(uuid())
   name        String
   destination String
   startDate   DateTime
   endDate     DateTime
   createdById String
-  createdBy   User       @relation(fields: [createdById], references: [id])
+  createdBy   User        @relation(fields: [createdById], references: [id])
   members     TripUser[]
   invites     Invite[]
   itinerary   Itinerary[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  poll        Poll[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
 model TripUser {
@@ -49,7 +50,7 @@ model TripUser {
   tripId String
   userId String
   role   Role   @default(MEMBER)
-  trip   Trip   @relation(fields: [tripId], references: [id],onDelete: Cascade)
+  trip   Trip   @relation(fields: [tripId], references: [id], onDelete: Cascade)
   user   User   @relation(fields: [userId], references: [id])
 
   @@unique([userId, tripId])
@@ -57,8 +58,8 @@ model TripUser {
 
 model Itinerary {
   id     String   @id @default(uuid())
-  tripId String  
-  trip   Trip     @relation(fields: [tripId], references: [id],onDelete: Cascade)
+  tripId String
+  trip   Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
   date   DateTime
 
   startTime String
@@ -76,13 +77,55 @@ model Invite {
   email     String
   token     String   @unique
   tripId    String
-  trip      Trip     @relation(fields: [tripId], references: [id],onDelete: Cascade)
+  trip      Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   accepted  Boolean  @default(false)
   createdAt DateTime @default(now())
 }
 
+model Poll {
+  id        String       @id @default(uuid())
+  tripId    String
+  createdBy String
+  question  String
+  type      PollType
+  isClosed  Boolean
+  options   PollOption[] 
+  votes     PollVote[]   
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  Trip Trip @relation(fields: [tripId], references: [id],onDelete: Cascade)
+}
+
+model PollOption {
+  id     String     @id @default(uuid())
+  pollId String
+  text   String
+  votes  PollVote[]
+  Poll   Poll       @relation(fields: [pollId], references: [id],onDelete: Cascade)
+}
+
+model PollVote {
+  id       String @id @default(uuid())
+  pollId   String
+  optionId String
+  userId   String
+
+  Poll   Poll       @relation(fields: [pollId], references: [id],onDelete: Cascade)
+  Option PollOption @relation(fields: [optionId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([pollId, userId, optionId])
+}
+
 enum Role {
   ADMIN
   MEMBER
+}
+
+enum PollType {
+  SINGLE
+  MULTIPLE
 }

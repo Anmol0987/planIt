@@ -1,0 +1,17 @@
+-- DropForeignKey
+ALTER TABLE "Poll" DROP CONSTRAINT "Poll_tripId_fkey";
+
+-- DropForeignKey
+ALTER TABLE "PollOption" DROP CONSTRAINT "PollOption_pollId_fkey";
+
+-- DropForeignKey
+ALTER TABLE "PollVote" DROP CONSTRAINT "PollVote_pollId_fkey";
+
+-- AddForeignKey
+ALTER TABLE "Poll" ADD CONSTRAINT "Poll_tripId_fkey" FOREIGN KEY ("tripId") REFERENCES "Trip"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PollOption" ADD CONSTRAINT "PollOption_pollId_fkey" FOREIGN KEY ("pollId") REFERENCES "Poll"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PollVote" ADD CONSTRAINT "PollVote_pollId_fkey" FOREIGN KEY ("pollId") REFERENCES "Poll"("id") ON DELETE CASCADE ON UPDATE CASCADE;

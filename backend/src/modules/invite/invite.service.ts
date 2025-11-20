@@ -21,7 +21,7 @@ export const inviteService = {
         role: Role.ADMIN,
       },
     });
-    console.log(isAdmin, "admin");
+    // console.log(isAdmin, "admin");
     if (!isAdmin)
       throw new Error("Only admin can invite new members to the trip");
     const existingInvite = await prisma.invite.findFirst({
