@@ -8,9 +8,9 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { Textarea } from "../ui/textarea";
+import { Textarea } from "@/components/ui/textarea";
 import toast from "react-hot-toast";
+import { useState } from "react";
 
 export default function AddItineraryDialog({
   open,
@@ -29,19 +29,19 @@ export default function AddItineraryDialog({
   const [title, setTitle] = useState("");
   const [note, setNote] = useState("");
 
-  const resetFields = () => {
-    setTitle("")
+  const reset = () => {
     setDate("");
     setStartTime("");
     setEndTime("");
+    setTitle("");
     setNote("");
   };
+
   const handleSubmit = () => {
     if (!date || !startTime || !endTime || !title.trim() || !note.trim()) {
       toast.error("All fields are required");
       return;
     }
-
     if (endTime <= startTime) {
       toast.error("End time must be greater than start time");
       return;
@@ -51,61 +51,78 @@ export default function AddItineraryDialog({
       date,
       startTime,
       endTime,
-      note: note.trim(),
       title: title.trim(),
+      note: note.trim(),
     });
 
-    resetFields();
+    reset();
   };
+
   const handleClose = (value: boolean) => {
     if (!loading) {
-      resetFields();
+      reset();
       setOpen(value);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="bg-white rounded-xl border">
+      <DialogContent
+         className="
+         sm:max-w-md 
+         rounded-2xl 
+         border border-border/60 
+         bg-[hsl(var(--card))]/90 
+         backdrop-blur-xl 
+         text-card-foreground 
+         shadow-2xl
+         p-6
+       "
+      >
         <DialogHeader>
-          <DialogTitle>Add Itinerary</DialogTitle>
+          <DialogTitle className="text-lg font-semibold">
+            Add Itinerary
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-3">
+        <div className="space-y-3 mt-2">
           <Input
-            type="text"
-            value={title}
             placeholder="Title"
+            value={title}
+              className="bg-background border-border"
             onChange={(e) => setTitle(e.target.value)}
           />
+
           <Input
             type="date"
             value={date}
+              className="bg-background border-border"
             onChange={(e) => setDate(e.target.value)}
           />
 
           <Input
             type="time"
             value={startTime}
+              className="bg-background border-border"
             onChange={(e) => setStartTime(e.target.value)}
-            placeholder="From"
           />
 
           <Input
             type="time"
             value={endTime}
+              className="bg-background border-border"
             onChange={(e) => setEndTime(e.target.value)}
-            placeholder="To"
           />
 
           <Textarea
-            placeholder="Activity (temple visit, hiking, etc)"
+            placeholder="Activity details"
             value={note}
+              className="bg-background border-border"
             onChange={(e) => setNote(e.target.value)}
           />
 
-          <Button className="w-full" onClick={handleSubmit} disabled={loading}>
-            {loading ? "Adding..." : "Add Itinerary"}
+          <Button className="w-full mt-2" disabled={loading} onClick={handleSubmit}>
+            {loading ? "Adding…" : "Add Itinerary"}
           </Button>
         </div>
       </DialogContent>

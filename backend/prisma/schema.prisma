@@ -14,20 +14,20 @@ model User {
   passwordHash  String
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  refreshTokens RefreshToken[]
+  // refreshTokens RefreshToken[]
   trips         TripUser[]
   createdTrips  Trip[]
 }
 
-model RefreshToken {
-  id        String   @id @default(uuid())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  token     String   @unique
-  revoked   Boolean  @default(false)
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-}
+// model RefreshToken {
+//   id        String   @id @default(uuid())
+//   user      User     @relation(fields: [userId], references: [id])
+//   userId    String
+//   token     String   @unique
+//   revoked   Boolean  @default(false)
+//   expiresAt DateTime
+//   createdAt DateTime @default(now())
+// }
 
 model Trip {
   id          String     @id @default(uuid())
@@ -49,7 +49,7 @@ model TripUser {
   tripId String
   userId String
   role   Role   @default(MEMBER)
-  trip   Trip   @relation(fields: [tripId], references: [id])
+  trip   Trip   @relation(fields: [tripId], references: [id],onDelete: Cascade)
   user   User   @relation(fields: [userId], references: [id])
 
   @@unique([userId, tripId])
@@ -58,7 +58,7 @@ model TripUser {
 model Itinerary {
   id     String   @id @default(uuid())
   tripId String  
-  trip   Trip     @relation(fields: [tripId], references: [id])
+  trip   Trip     @relation(fields: [tripId], references: [id],onDelete: Cascade)
   date   DateTime
 
   startTime String
@@ -76,7 +76,7 @@ model Invite {
   email     String
   token     String   @unique
   tripId    String
-  trip      Trip     @relation(fields: [tripId], references: [id])
+  trip      Trip     @relation(fields: [tripId], references: [id],onDelete: Cascade)
   expiresAt DateTime
   accepted  Boolean  @default(false)
   createdAt DateTime @default(now())

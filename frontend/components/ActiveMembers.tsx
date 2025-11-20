@@ -8,12 +8,15 @@ interface Member {
 
 export default function ActiveMembers({ activeMembers }: { activeMembers: Member[] }) {
   return (
-    <div className="flex-col w-full max-w-2xl justify-start bg-accent p-3 rounded-md mt-4">
-      <strong>👥 Active now:</strong>
-      <ul className="mt-1 mx-12 text-sm max-w-fit text-muted-foreground">
+    <div className="w-full  bg-card text-card-foreground border border-border rounded-xl p-4 shadow-sm mt-4">
+      <p className="font-medium flex items-center gap-2">
+        👥 Active now:
+      </p>
+
+      <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
         {activeMembers.map((m) => (
-          <li className="flex items-center gap-2 h-5" key={m.userId}>
-            <div className="bg-green-400 h-2 w-2 rounded-full"></div>
+          <li key={m.userId} className="flex items-center gap-2">
+            <span className="h-2.5 w-2.5 rounded-full bg-green-500"></span>
             {m.name}
           </li>
         ))}

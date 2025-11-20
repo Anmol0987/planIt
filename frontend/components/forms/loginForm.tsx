@@ -13,7 +13,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 
 type LoginData = z.infer<typeof loginSchema>;
 
@@ -24,7 +23,7 @@ export default function LoginForm() {
   const {
     register,
     handleSubmit,
-    formState: { isSubmitting,errors },
+    formState: { isSubmitting, errors },
   } = useForm<LoginData>({
     resolver: zodResolver(loginSchema),
   });
@@ -42,63 +41,52 @@ export default function LoginForm() {
 
   return (
     <div className="w-full max-w-md">
-    <Card className="border-border shadow-lg bg-gradient-card">
-      <CardHeader className="space-y-1 pb-6">
-        <CardTitle className="text-2xl font-semibold tracking-tight text-center">
-          Welcome back
-        </CardTitle>
-        <p className="text-sm text-muted-foreground text-center">
-          Enter your credentials to access your account
-        </p>
-      </CardHeader>
+      <Card className="border-border bg-card text-card-foreground shadow-md rounded-xl">
+        <CardHeader className="space-y-1 pb-6">
+          <CardTitle className="text-2xl font-semibold tracking-tight text-center">
+            Welcome back
+          </CardTitle>
+          <p className="text-sm text-muted-foreground text-center">
+            Enter your credentials to continue
+          </p>
+        </CardHeader>
 
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          {/* Email Field */}
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium">
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              className="h-10"
-              {...register("email")}
-            />
-            {errors.email && (
-              <p className="text-xs text-destructive">{errors.email.message}</p>
-            )}
-          </div>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                {...register("email")}
+                className="h-10"
+              />
+              {errors.email && (
+                <p className="text-xs text-destructive">{errors.email.message}</p>
+              )}
+            </div>
 
-          {/* Password Field */}
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-medium">
-              Password
-            </Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              className="h-10"
-              {...register("password")}
-            />
-            {errors.password && (
-              <p className="text-xs text-destructive">{errors.password.message}</p>
-            )}
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                {...register("password")}
+                className="h-10"
+              />
+              {errors.password && (
+                <p className="text-xs text-destructive">{errors.password.message}</p>
+              )}
+            </div>
 
-          {/* Submit Button */}
-          <Button 
-            type="submit" 
-            className="w-full h-10 font-medium" 
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Signing in..." : "Sign in"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
-  </div>
+            <Button type="submit" className="w-full h-10" disabled={isSubmitting}>
+              {isSubmitting ? "Signing in…" : "Sign in"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

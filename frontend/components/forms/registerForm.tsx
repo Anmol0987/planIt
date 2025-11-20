@@ -20,7 +20,7 @@ export default function RegisterForm() {
   const {
     register,
     handleSubmit,
-    formState: { isSubmitting ,errors },
+    formState: { isSubmitting, errors },
   } = useForm<RegisterData>({
     resolver: zodResolver(registerSchema),
   });
@@ -29,7 +29,7 @@ export default function RegisterForm() {
     try {
       await api.post("/auth/signUp", data);
       toast.success("Account created! Please login.");
-      router.push("/");
+      router.push("/login");
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Registration failed");
     }
@@ -37,81 +37,66 @@ export default function RegisterForm() {
 
   return (
     <div className="w-full max-w-md">
-    <Card className="border-border shadow-lg bg-gradient-card">
-      <CardHeader className="space-y-1 pb-6">
-        <CardTitle className="text-2xl font-semibold tracking-tight text-center">
-          Create an account
-        </CardTitle>
-        <p className="text-sm text-muted-foreground text-center">
-          Start planning your next adventure
-        </p>
-      </CardHeader>
+      <Card className="border-border bg-card text-card-foreground shadow-md rounded-xl">
+        <CardHeader className="space-y-1 pb-6">
+          <CardTitle className="text-2xl font-semibold tracking-tight text-center">
+            Create an account
+          </CardTitle>
+          <p className="text-sm text-muted-foreground text-center">
+            Start planning your next adventure
+          </p>
+        </CardHeader>
 
-      <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          {/* Name Field */}
-          <div className="space-y-2">
-            <Label htmlFor="name" className="text-sm font-medium">
-              Full name
-            </Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="John Doe"
-              className="h-10"
-              {...register("name")}
-            />
-            {errors.name && (
-              <p className="text-xs text-destructive">{errors.name.message}</p>
-            )}
-          </div>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full name</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="John Doe"
+                {...register("name")}
+                className="h-10"
+              />
+              {errors.name && (
+                <p className="text-xs text-destructive">{errors.name.message}</p>
+              )}
+            </div>
 
-          {/* Email Field */}
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium">
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              className="h-10"
-              {...register("email")}
-            />
-            {errors.email && (
-              <p className="text-xs text-destructive">{errors.email.message}</p>
-            )}
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                {...register("email")}
+                className="h-10"
+              />
+              {errors.email && (
+                <p className="text-xs text-destructive">{errors.email.message}</p>
+              )}
+            </div>
 
-          {/* Password Field */}
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-medium">
-              Password
-            </Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              className="h-10"
-              {...register("password")}
-            />
-            {errors.password && (
-              <p className="text-xs text-destructive">{errors.password.message}</p>
-            )}
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                {...register("password")}
+                className="h-10"
+              />
+              {errors.password && (
+                <p className="text-xs text-destructive">{errors.password.message}</p>
+              )}
+            </div>
 
-
-          {/* Submit Button */}
-          <Button 
-            type="submit" 
-            className="w-full h-10 font-medium" 
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Creating account..." : "Create account"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
-  </div>
+            <Button type="submit" className="w-full h-10" disabled={isSubmitting}>
+              {isSubmitting ? "Creating…" : "Create account"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

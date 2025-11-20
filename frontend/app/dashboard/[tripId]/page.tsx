@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { api } from "@/app/lib/api";
 import { useAuthStore } from "@/app/lib/store";
 import { Button } from "@/components/ui/button";
@@ -30,8 +30,7 @@ import ChatSection from "@/components/ChatSection";
 export default function TripDetailsPage() {
   const router = useRouter();
   const { tripId } = useParams<{ tripId: string }>();
-  const { user, setUser } = useAuthStore();
-
+  const { user } = useAuthStore();
 
   const { trip, invites, setInvites, loading, isAdmin } = useTripData(tripId);
   const { activeMembers } = useTripSocket(tripId, setInvites);
@@ -69,31 +68,32 @@ export default function TripDetailsPage() {
     }
   };
 
-  // Loading user?
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center text-foreground">
         Loading…
       </div>
     );
   }
 
-  // Loading trip or itinerary
   if (loading || !trip || itineraryLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center text-foreground">
         Loading trip…
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center py-10 px-4 bg-background text-foreground">
-      <div className="w-full max-w-2xl space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">{trip.name}</h1>
-          <Link href="/dashboard">
-            <Button variant="outline">← Back</Button>
+    <main className="min-h-screen w-full flex flex-col items-center py-8 px-4 bg-background text-foreground">
+      <div className="w-full max-w-3xl space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-2xl sm:text-3xl font-semibold">{trip.name}</h1>
+
+          <Link href="/dashboard" className="w-full sm:w-auto">
+            <Button variant="outline" className="w-full sm:w-auto">
+              ← Back
+            </Button>
           </Link>
         </div>
 
@@ -104,33 +104,32 @@ export default function TripDetailsPage() {
         />
       </div>
 
-      <Tabs defaultValue="itinerary" className="w-full max-w-2xl mt-6">
-        <TabsList className="grid grid-cols-3 md:grid-cols-4 w-full">
-          <TabsTrigger value="itinerary">
-            <CalendarIcon className="w-4 h-4 mr-2" />
+      <Tabs defaultValue="itinerary" className="w-full max-w-3xl mt-6">
+        <TabsList className="grid grid-cols-3 md:grid-cols-4 w-full bg-muted text-foreground">
+          <TabsTrigger value="itinerary" className="text-sm flex items-center">
+            <CalendarIcon className="w-4 h-4 mr-1" />
             Itinerary
           </TabsTrigger>
 
-          <TabsTrigger value="members">
-            <UsersIcon className="w-4 h-4 mr-2" />
+          <TabsTrigger value="members" className="text-sm flex items-center">
+            <UsersIcon className="w-4 h-4 mr-1" />
             Members
           </TabsTrigger>
 
-          <TabsTrigger value="chat">
-            <MessageSquareIcon className="w-4 h-4 mr-2" />
+          <TabsTrigger value="chat" className="text-sm flex items-center">
+            <MessageSquareIcon className="w-4 h-4 mr-1" />
             Chat
           </TabsTrigger>
 
           {isAdmin && (
-            <TabsTrigger value="invites">
-              <MailPlusIcon className="w-4 h-4 mr-2" />
+            <TabsTrigger value="invites" className="text-sm flex items-center">
+              <MailPlusIcon className="w-4 h-4 mr-1" />
               Invites
             </TabsTrigger>
           )}
         </TabsList>
 
-        {/* Itinerary */}
-        <TabsContent value="itinerary">
+        <TabsContent value="itinerary" className="pt-4">
           <ItinerarySection
             itinerary={itinerary}
             isAdmin={isAdmin}
@@ -138,28 +137,24 @@ export default function TripDetailsPage() {
           />
         </TabsContent>
 
-        {/* Members */}
-        <TabsContent value="members">
+        <TabsContent value="members" className="pt-4">
           <ActiveMembers activeMembers={activeMembers} />
         </TabsContent>
 
-        {/* Chat */}
-        <TabsContent value="chat">
+        <TabsContent value="chat" className="pt-4">
           <ChatSection tripId={tripId} />
         </TabsContent>
 
-        {/* Invites */}
         {isAdmin && (
-          <TabsContent value="invites">
+          <TabsContent value="invites" className="pt-4">
             <PendingInvites invites={invites} />
-            <Button className="mt-3" onClick={() => setInviteOpen(true)}>
+            <Button className="mt-4 w-full" onClick={() => setInviteOpen(true)}>
               Send Invite
             </Button>
           </TabsContent>
         )}
       </Tabs>
 
-      {/* Invite Dialog */}
       <InviteDialog
         open={inviteOpen}
         setOpen={setInviteOpen}
@@ -169,7 +164,6 @@ export default function TripDetailsPage() {
         onSend={sendInvite}
       />
 
-      {/* Add Itinerary Dialog */}
       <AddItineraryDialog
         open={addOpen}
         setOpen={setAddOpen}
