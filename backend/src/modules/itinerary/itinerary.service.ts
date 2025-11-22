@@ -1,19 +1,34 @@
+import { Itinerary } from "@prisma/client";
 import prisma from "../../prisma";
 import { getIO } from "../../sockets";
+
+
+export interface CreateItineraryInput {
+  date: string;
+  startTime: string;
+  endTime: string;
+  title: string;
+  note?: string;
+  }
+  
+  
+  export interface ItineraryListResponse {
+  success: boolean;
+  data: Itinerary[];
+  }
+  
+  
+  export interface ItineraryCreateResponse {
+  success: boolean;
+  data: Itinerary;
+  }
 
 export const itineraryService = {
   async createItinerary(
     tripId: string,
     userId: string,
-    data: {
-      date: string;
-      startTime: string;
-      endTime: string;
-      title: string;
-      note?: string;
-    }
-  ) {
-    console.log("data",data)
+    data: CreateItineraryInput
+  ):Promise<Itinerary> {
     const isAdmin = await prisma.tripUser.findFirst({
       where: {
         tripId,
@@ -21,7 +36,6 @@ export const itineraryService = {
         role: "ADMIN",
       },
     });
-    console.log("isadmin",isAdmin)
 
     if (!isAdmin) throw new Error("Only admin can add Itenary");
 
@@ -40,19 +54,20 @@ export const itineraryService = {
         note: data.note || null,
       },
     });
-    console.log("askfbadkfbkas",itinerary)
 
     getIO().to(tripId).emit("trip:itineraryCreated", itinerary);
     return itinerary;
   },
-  async getItineraryById(tripId: string) {
-    const itineraryData = await prisma.itinerary.findMany({
+
+
+  async getItineraryById(tripId: string):Promise<Itinerary[]> {
+    const itineraries = await prisma.itinerary.findMany({
       where: { tripId },
       orderBy: {
         date: "asc",
       },
     });
 
-    return itineraryData
+    return itineraries
   },
 };

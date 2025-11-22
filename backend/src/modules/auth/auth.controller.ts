@@ -2,14 +2,6 @@ import { signInSchema, signUpSchema } from "./auth.schema";
 import { Request, Response } from "express";
 import { loginUser, registerUser } from "./auth.service";
 import z from "zod";
-import { env } from "../../config/env";
-import prisma from "../../prisma";
-import jwt, { JwtPayload } from "jsonwebtoken";
-import {
-  signAccessToken,
-  signRefreshToken,
-  verifyRefreshToken,
-} from "../../utils/jwt";
 
 /**
  * Handles user registration
@@ -32,7 +24,7 @@ export const signUp = async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({ success: false, errors: error.issues });
       return;
     }
-    // Hide implementation details from client
+
     console.error("[SignUp Error]", error);
     res.status(500).json({
       success: false,
@@ -49,17 +41,15 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const data = signInSchema.parse(req.body);
 
-    const { accessToken, user } = await loginUser(
-      data.password,
-      data.email
-    );
+    const { accessToken, user } = await loginUser(data.password, data.email);
 
     res.cookie("token", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60 * 1000, //30days
     });
-     res.status(200).json({ user });
+    res.status(200).json({ success: true, user });
   } catch (error: unknown) {
     if (error instanceof z.ZodError) {
       res.status(400).json({ success: false, errors: error.issues });
@@ -71,6 +61,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 };
 
 // export const refreshAccessToken = async (req: Request, res: Response) => {
+
 //   console.log("inside refresh token ig", req.body);
 //   try {
 //     const token = req.body.refreshToken;
@@ -120,14 +111,14 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 //     return res.status(500).json({ message: "Internal server error" });
 //   }
 // };
-export const getMe = (req:Request, res:Response) => {
 
-  if (!req.user) {
-    return res.status(401).json({ message: "Not authenticated" });
+
+export const getMe = (req: Request, res: Response) => {
+  try {
+  if (!req.user) return res.status(401).json({ success: false, message: "Not authenticated" });
+  return res.status(200).json({ success: true, user: req.user });
+  } catch (err: any) {
+  console.error("getMe error:", err?.message || err);
+  return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
-
-  return res.status(200).json({
-    success: true,
-    user: req.user,
-  });
-};
+  };

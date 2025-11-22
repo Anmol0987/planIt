@@ -4,16 +4,25 @@ import { Role } from "@prisma/client";
 import { Invite } from "@prisma/client";
 import { getIO } from "../../sockets";
 
+interface CreateInviteInterface {
+  userId: string;
+  tripId: string;
+  email: string;
+};
+
+ interface AcceptinviteInterface {
+  userId: string;
+  token: string;
+};
 export const inviteService = {
-  async createInvite(
-    userId: string,
-    tripId: string,
-    email: string
-  ): Promise<Invite> {
+  async createInvite({
+    userId,
+    tripId,
+    email,
+  }: CreateInviteInterface): Promise<Invite> {
     const normalizedTripId = tripId.trim();
     const normalizedUserId = userId.trim();
 
-    console.log(normalizedTripId, normalizedUserId);
     const isAdmin = await prisma.tripUser.findMany({
       where: {
         userId: normalizedUserId,
@@ -43,13 +52,12 @@ export const inviteService = {
         email,
         token,
         expiresAt,
-        tripId,
+        tripId: normalizedTripId,
       },
     });
-    console.log("invite============", invite);
     getIO().to(tripId).emit("trip:inviteCreated", {
       email,
-      tripId,
+      tripId: normalizedTripId,
       createdAt: invite.createdAt,
     });
 
@@ -57,7 +65,7 @@ export const inviteService = {
     return invite;
   },
 
-  async AcceptInvite(userId: string, token: string): Promise<string> {
+  async AcceptInvite({userId, token}:AcceptinviteInterface): Promise<string> {
     const invite = await prisma.invite.findUnique({
       where: {
         token,
@@ -76,7 +84,7 @@ export const inviteService = {
     if (existing) {
       throw new Error("You are already part of this trip");
     }
-//add user to trip
+    //add user to trip
     await prisma.tripUser.create({
       data: {
         tripId: invite.tripId,
@@ -96,12 +104,10 @@ export const inviteService = {
       },
     });
 
-
-    return invite.tripId; 
+    return invite.tripId;
   },
 
   async getTripInvites(userId: string, tripId: string): Promise<Invite[]> {
-    try {
       const admin = await prisma.tripUser.findFirst({
         where: {
           userId,
@@ -123,11 +129,6 @@ export const inviteService = {
       });
       if (!invites) throw new Error("No invites found");
       return invites;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new Error(error.message);
-      }
-      throw new Error("An unexpected error occurred");
-    }
+   
   },
 };

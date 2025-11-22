@@ -7,12 +7,13 @@ export const registerUser = async (
   name: string,
   email: string,
   password: string
-) : Promise<User> => {
+): Promise<User> => {
   try {
+    const normalizedEmail = email.trim().toLowerCase();
     //checks in DB is user already exists with email
     const exist = await prisma.user.findUnique({
       where: {
-        email,
+        email: normalizedEmail,
       },
     });
     if (exist) throw new Error("User already exists");
@@ -21,7 +22,7 @@ export const registerUser = async (
     const passwordHash = await hashPassword(password);
     const user = await prisma.user.create({
       data: {
-        email,
+        email: normalizedEmail,
         passwordHash,
         name,
       },
@@ -36,17 +37,25 @@ export const registerUser = async (
   }
 };
 
-export const loginUser = async (password: string, email: string): Promise<{user: User, accessToken: string}> => {
+export const loginUser = async (
+  password: string,
+  email: string
+): Promise<{ user: User; accessToken: string }> => {
   try {
+    const normalizedEmail = email.trim().toLowerCase();
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email:normalizedEmail },
     });
     if (!user) throw new Error("Invalid Credentials");
 
     const valid = await comparePassword(password, user.passwordHash);
     if (!valid) throw new Error("Invalid credentials");
 
-    const accessToken = signAccessToken({ userId: user.id,email:user.email ,name:user.name});
+    const accessToken = signAccessToken({
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+    });
     // const refreshToken = signRefreshToken({ userId: user.id,email:user.email,name:user.name });
 
     // await prisma.refreshToken.create({
@@ -56,9 +65,9 @@ export const loginUser = async (password: string, email: string): Promise<{user:
     //     expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30), //30 days expiery,
     //   },
     // });
-    return {user,accessToken}
+    return { user, accessToken };
   } catch (e) {
-    console.error("Error in loginUser:", e as Error );
+    console.error("Error in loginUser:", e as Error);
 
     throw new Error(
       "An error occurred while Logging the user. Please try again later."

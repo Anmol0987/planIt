@@ -35,13 +35,13 @@ export default function Navbar() {
         </h1>
 
         <div className="flex items-center gap-2">
-          {/* <Button
+          <Button
             variant="ghost"
             size="icon"
             onClick={() => setTheme(theme === "light" ? "dark" : "light")}
           >
             {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-          </Button> */}
+          </Button>
 
           {user && (
             <Button variant="outline" onClick={handleLogout}>

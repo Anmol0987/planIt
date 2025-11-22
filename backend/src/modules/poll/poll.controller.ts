@@ -8,9 +8,9 @@ import {
 import { VoteSchema } from "./poll.schema";
 import prisma from "../../prisma";
 import { Role } from "@prisma/client";
-import { success } from "zod";
+import z, { success } from "zod";
 
-export const getPollDetailsById = async (req: Request, res: Response) => {
+export const getPollDetailsById = async (req: Request, res: Response): Promise<Response> => {
   try {
     const userId = req.user?.id;
     const pollId = req.params.id;
@@ -20,15 +20,15 @@ export const getPollDetailsById = async (req: Request, res: Response) => {
 
     const poll = await getPollDetailsByIdService(pollId);
     if (!poll) {
-      res.status(404).json({ success: false, message: "Poll not found" });
+      return res.status(404).json({ success: false, message: "Poll not found" });
     }
     return res.status(200).json({ success: true, data: poll });
   } catch (err: any) {
-    res.status(400).json({ success: false, message: err.message });
+   return res.status(400).json({ success: false, message: err.message });
   }
 };
 
-export const voteOnPoll = async (req: Request, res: Response) => {
+export const voteOnPoll = async (req: Request, res: Response) : Promise<Response>=> {
   try {
     const pollId = req.params.id;
     const userId = req.user?.id;
@@ -44,16 +44,16 @@ export const voteOnPoll = async (req: Request, res: Response) => {
       optionIds: data.optionIds,
     });
 
-    res.status(200).json({ success: true, data: response });
+   return res.status(200).json({ success: true, data: response });
   } catch (err: any) {
-    res.status(400).json({
-      success: false,
-      message: err.message,
-    });
-  }
+    if (err instanceof z.ZodError) {
+    return res.status(400).json({ success: false, message: err.message });
+    }
+    return res.status(400).json({ success: false, message: err.message });
+    }
 };
 
-export const deletePollById = async (req: Request, res: Response) => {
+export const deletePollById = async (req: Request, res: Response): Promise<Response> => {
   try {
     const userId = req.user?.id;
     const pollId = req.params.id;
@@ -88,14 +88,14 @@ export const deletePollById = async (req: Request, res: Response) => {
     const response = await deletePollByIdService(pollId);
     return res.status(200).json({success:true,data:response})
   } catch (err: any) {
-    res.status(400).json({
+   return res.status(400).json({
       success: false,
       message: err.message,
     });
   }
 };
 
-export const closePollById=async(req:Request,res:Response)=>{
+export const closePollById=async(req:Request,res:Response): Promise<Response>=>{
 
     try {
         const userId = req.user?.id;

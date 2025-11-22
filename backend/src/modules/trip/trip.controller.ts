@@ -9,36 +9,41 @@ import {
   getUsersTrip,
   updateById,
 } from "./trip.service";
-import prisma from "../../prisma";
-import { Role } from "@prisma/client";
 
 export const createTrip = async (req: Request, res: Response) => {
   try {
     const data = createTripSchema.parse(req.body);
     const userId = req.user?.id;
-    if (userId) {
-      const trip = await CreateTrip(userId, data);
+    if (!userId)
+      return res
+        .status(401)
+        .json({ success: false, message: "User not found" });
 
-      res.status(201).json({ success: true, data: trip });
-    } else {
-      throw new Error("User Not found");
-    }
+    const trip = await CreateTrip(userId, data);
+
+    return res.status(201).json({ success: true, data: trip });
   } catch (err: any) {
-    res.status(400).json({ success: false, message: err.message });
+    return res
+      .status(400)
+      .json({ success: false, message: err.message || "Bad Request" });
   }
 };
 
 export const getTrips = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
-    if (userId) {
-      const trip = await getUsersTrip(userId);
-      res.status(201).json({ success: true, data: trip });
-    } else {
-      throw new Error("User Not found");
-    }
+    if (!userId)
+      return res
+        .status(401)
+        .json({ success: false, message: "User not found" });
+
+    const trip = await getUsersTrip(userId);
+    return res.status(201).json({ success: true, data: trip });
   } catch (err: any) {
-    res.status(400).json({ success: false, message: err.message });
+    return res.status(400).json({
+      success: false,
+      message: err.message || "Internal Server Error",
+    });
   }
 };
 
@@ -46,14 +51,21 @@ export const getTripsById = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     const tripId = req.params.id;
-    if (userId) {
-      const trip = await getTripById(tripId, userId);
-      res.status(201).json({ success: true, data: trip });
-    } else {
-      throw new Error("User Not found");
-    }
+    if (!userId)
+      return res
+        .status(401)
+        .json({ success: false, message: "User not found" });
+    if (!tripId)
+      return res
+        .status(400)
+        .json({ success: false, message: "Trip id required" });
+
+    const trip = await getTripById(tripId, userId);
+    return res.status(201).json({ success: true, data: trip });
   } catch (err: any) {
-    res.status(400).json({ success: false, message: err.message });
+    return res
+      .status(400)
+      .json({ success: false, message: err.message || "Not found" });
   }
 };
 
@@ -62,35 +74,23 @@ export const deleteTripById = async (req: Request, res: Response) => {
     const userId = req.user?.id;
     const tripId = req.params.id;
 
-    if (!userId || !tripId) {
+    if (!userId)
+      return res
+        .status(401)
+        .json({ success: false, message: "User not found" });
+    if (!tripId)
       return res
         .status(400)
-        .json({ success: false, message: "Invalid request" });
-    }
-    const trip = await prisma.trip.findUnique({
-      where: { id: tripId },
-      include: { members: true },
-    });
-    if (!trip) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Trip not found" });
-    }
-
-    const isAdmin = trip.members.some(
-      (m) => m.userId === userId && m.role === "ADMIN"
-    );
-
-    if (!isAdmin) {
-      return res.status(403).json({
-        success: false,
-        message: "Not authorized to delete this trip",
-      });
-    }
-    const deleted = await deleteById(tripId);
-    res.status(200).json({ success: true, data: deleted });
+        .json({ success: false, message: "Trip id required" });
+    const deleted = await deleteById(tripId, userId);
+    return res.status(200).json({ success: true, data: deleted });
   } catch (err: any) {
-    res.status(400).json({ success: false, message: err.message });
+    const message = err?.message || "Internal Server Error";
+    if (message.includes("Not authorized"))
+      return res.status(403).json({ success: false, message });
+    if (message.includes("not found"))
+      return res.status(404).json({ success: false, message });
+    return res.status(500).json({ success: false, message });
   }
 };
 
@@ -99,31 +99,25 @@ export const updateTripById = async (req: Request, res: Response) => {
     const userId = req.user?.id;
     const tripId = req.params.id;
     const data = req.body;
-    console.log("data", data);
-    if (!userId || !tripId) {
+    if (!userId)
+      return res
+        .status(401)
+        .json({ success: false, message: "User not found" });
+    if (!tripId)
       return res
         .status(400)
-        .json({ success: false, message: "Invalid request" });
-    }
-    const trip = await prisma.trip.findUnique({
-      where: { id: tripId },
-      include: { members: true },
-    });
-    if (!trip)
-      return res.status(403).json({ success: false, message: "No trip found" });
+        .json({ success: false, message: "Trip id required" });
 
-    const isAdmin = trip.members.some(
-      (m) => m.userId === userId && m.role === "ADMIN"
-    );
-    if (!isAdmin)
-      return res
-        .status(404)
-        .json({ success: false, message: "Not authorized to update trip" });
-
-    const updatedTrip = await updateById(tripId, data);
-    console.log("updated values", updatedTrip);
-    res.status(200).json({ success: true, data: updatedTrip });
-  } catch (e) {}
+    const updatedTrip = await updateById(tripId, userId, data);
+    return res.status(200).json({ success: true, data: updatedTrip });
+  } catch (err: any) {
+    const message = err?.message || "Internal Server Error";
+    if (message.includes("Not authorized"))
+      return res.status(403).json({ success: false, message });
+    if (message.includes("not found"))
+      return res.status(404).json({ success: false, message });
+    return res.status(500).json({ success: false, message });
+  }
 };
 
 //polls
@@ -134,20 +128,22 @@ export const createPoll = async (req: Request, res: Response) => {
     const tripId = req.params.id;
     const userId = req.user?.id;
 
-    if (!data || !tripId || !userId) {
-      return res.status(400).json({ success: false, message: "Not Valid" });
-    }
+    if (!userId)
+      return res
+        .status(401)
+        .json({ success: false, message: "User not found" });
+    if (!tripId)
+      return res
+        .status(400)
+        .json({ success: false, message: "Trip id required" });
 
-    const isAdmin = await prisma.tripUser.findMany({
-      where: { userId, tripId, role: Role.ADMIN },
-    });
-    if (!isAdmin)
-      throw new Error("Only admin can create new poll to the trip");
     const poll = await createPollService(userId!, tripId, data);
-    console.log("poll", poll);
-    res.status(200).json({ success: true, data: poll });
+    return res.status(200).json({ success: true, data: poll });
   } catch (err: any) {
-    res.status(400).json({ success: false, message: err.message });
+    const message = err?.message || "Internal Server Error";
+    if (message.includes("Only admin"))
+      return res.status(403).json({ success: false, message });
+    return res.status(400).json({ success: false, message });
   }
 };
 
@@ -156,12 +152,21 @@ export const getPoll = async (req: Request, res: Response) => {
     const userId = req.user?.id;
     const tripId = req.params.id;
 
-    if (!tripId || !userId)
-      res.status(400).json({ success: false, message: "Not Valid" });
+    if (!userId)
+      return res
+        .status(401)
+        .json({ success: false, message: "User not found" });
+    if (!tripId)
+      return res
+        .status(400)
+        .json({ success: false, message: "Trip id required" });
 
-    const poll = await getPollService(tripId);
-    res.status(200).json({ success: true, data: poll });
+    const poll = await getPollService(tripId, userId);
+    return res.status(200).json({ success: true, data: poll });
   } catch (err: any) {
-    res.status(400).json({ success: false, message: err.message });
+    const message = err?.message || "Internal Server Error";
+    if (message.includes("Access denied"))
+      return res.status(403).json({ success: false, message });
+    return res.status(500).json({ success: false, message });
   }
 };
