@@ -14,13 +14,13 @@ export const initSocket = (): Socket | null => {
   });
 
   socket.on("connect", () => {
-    console.log("connected to socket");
+    // console.log("connected to socket");
   });
   socket.on("connect_error", (error) => {
-    console.log("connect_error", error.message);
+    // console.log("connect_error", error.message);
   });
   socket.on("disconnect", (reason) => {
-    console.log("disconnected to socket", reason);
+    // console.log("disconnected to socket", reason);
   });
   return socket;
 };

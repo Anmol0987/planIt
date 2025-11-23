@@ -55,16 +55,16 @@ export const setupSocketServer = (server: http.Server): Server => {
 
   io.on("connection", (socket: Socket) => {
     const user = socket.data.user;
-    console.log("🧠 Full user object on connect:", user);
+    // console.log("🧠 Full user object on connect:", user);
     if (user && user.email) {
-      console.log(`User connected: ${user.email}`);
+      // console.log(`User connected: ${user.email}`);
     }
 
     setupTripSocket(io as Server, socket);
 
     socket.on("disconnect", () => {
       if (user && user.email) {
-        console.log(`User disconnected: ${user.email}`);
+        // console.log(`User disconnected: ${user.email}`);
       }
     });
   });

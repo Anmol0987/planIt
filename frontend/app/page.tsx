@@ -1,25 +1,22 @@
-import LoginForm from "@/components/forms/loginForm";
-import Link from "next/link";
+import { Features } from "@/components/Features";
+import { Footer } from "@/components/Footer";
+import { Hero } from "@/components/Hero";
+import { HowItWorks } from "@/components/HowItWorks";
+import { InteractiveScreens } from "@/components/InteractiveScreen";
+import Navbar from "@/components/navbar";
+import { Pricing } from "@/components/Pricing";
+import { Testimonials } from "@/components/Testimonials";
 
-export default function Home() {
+export default function App() {
   return (
-    <main className=" flex  gap-16 items-center justify-center bg-background min-h-screen text-foreground transition-colors duration-300">
-      <p className="mt-6 text-sm text-muted-foreground">
-        <Link
-          href="/login"
-          className="text-primary hover:underline font-medium transition-colors"
-        >
-          Login
-        </Link>
-      </p>
-      <p className="mt-6 text-sm text-muted-foreground">
-        <Link
-          href="/register"
-          className="text-primary hover:underline font-medium transition-colors"
-        >
-          Register
-        </Link>
-      </p>
-    </main>
+    <div className="min-h-screen bg-white">
+      <Hero />
+      <Features />
+      <InteractiveScreens />
+      <HowItWorks />
+      <Testimonials />
+      <Pricing />
+      <Footer />
+    </div>
   );
 }

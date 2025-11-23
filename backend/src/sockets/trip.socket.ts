@@ -78,7 +78,7 @@ export function setupTripSocket(io: Server, socket: Socket): void {
     socket.leave(tripId);
     socket.data.trips?.delete(tripId);
 
-    console.log(`👋 ${user.name} left trip ${tripId}`);
+    // console.log(`👋 ${user.name} left trip ${tripId}`);
 
     // remove the user from active members list
     const members = activeMembers.get(tripId);
@@ -126,7 +126,7 @@ export function setupTripSocket(io: Server, socket: Socket): void {
         name: user.name,
       });
     });
-    console.log(`❌ ${user.email} disconnected`);
+    // console.log(`❌ ${user.email} disconnected`);
   });
 
   socket.on("trip:createInvite", async ({ tripId, email }) => {

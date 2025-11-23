@@ -14,30 +14,15 @@ import {
 } from "./ui/dialog";
 import { api } from "@/app/lib/api";
 import { Trash2, X } from "lucide-react";
+import { usePolls } from "@/app/hooks/usePolls";
+import { SkeletonPollCard } from "./SkeletonComponents";
 
 export default function PollSection({ tripId }: { tripId: string }) {
-  const [polls, setPolls] = useState<Poll[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { polls, loading, setPolls, fetchPolls } = usePolls(tripId);
 
   const [isOpen, setIsOpen] = useState(false);
   const [newQuestion, setNewQuestion] = useState("");
   const [newOptions, setNewOptions] = useState<string[]>(["", ""]);
-
-
-  async function loadPolls() {
-    try {
-      const res = await api.get(`/trip/${tripId}/polls`);
-      setPolls(res.data.data || []);
-    } catch (err) {
-      console.error("Error loading polls", err);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadPolls();
-  }, [tripId]);
 
   async function createPoll() {
     const question = newQuestion.trim();
@@ -59,46 +44,71 @@ export default function PollSection({ tripId }: { tripId: string }) {
       setNewQuestion("");
       setNewOptions(["", ""]);
 
-      loadPolls();
+      fetchPolls();
     } catch (err) {
       console.error("Error creating poll:", err);
     }
   }
 
-
   async function vote(pollId: string, optionId: string) {
+    setPolls((prev) =>
+      prev.map((poll) => {
+        if (poll.id !== pollId) return poll;
+
+        // remove user’s previous vote
+        const filteredVotes = poll.votes.filter((v) => v.userId !== "temp");
+
+        return {
+          ...poll,
+          votes: [
+            ...filteredVotes,
+            {
+              id: Date.now().toString(),
+              optionId,
+              userId: "temp",
+            },
+          ],
+        };
+      })
+    );
     try {
       await api.post(`/polls/${pollId}/vote`, {
         optionIds: [optionId],
       });
 
-      loadPolls();
+      fetchPolls();
     } catch (err) {
       console.error("Error voting:", err);
     }
   }
 
-
   async function closePoll(pollId: string) {
+    setPolls((prev) =>
+      prev.map((p) => (p.id === pollId ? { ...p, isClosed: true } : p))
+    );
+
     try {
       await api.patch(`/polls/${pollId}/close`);
-      loadPolls();
+      fetchPolls();
     } catch (err) {
       console.error("Error closing poll:", err);
     }
   }
 
   async function deletePoll(pollId: string) {
+    setPolls((prev) => prev.filter((p) => p.id !== pollId));
+
     try {
       await api.delete(`/polls/${pollId}`);
-      loadPolls();
+      fetchPolls();
     } catch (err) {
       console.error("Error deleting poll:", err);
     }
   }
 
-  if (loading) return <p>Loading polls...</p>;
-
+  if (loading) {
+    return <SkeletonPollCard />;
+  }
   return (
     <div className="p-4 space-y-4 w-full">
       <div className="flex items-center justify-between">
@@ -133,9 +143,7 @@ export default function PollSection({ tripId }: { tripId: string }) {
                   value={opt}
                   onChange={(e) =>
                     setNewOptions((arr) =>
-                      arr.map((v, idx) =>
-                        idx === i ? e.target.value : v
-                      )
+                      arr.map((v, idx) => (idx === i ? e.target.value : v))
                     )
                   }
                   placeholder={`Option ${i + 1}`}
@@ -198,7 +206,6 @@ export default function PollSection({ tripId }: { tripId: string }) {
             </div>
           </div>
 
-
           <div className="space-y-3">
             {poll.options.map((opt) => {
               const count = poll.votes.filter(
@@ -227,7 +234,10 @@ export default function PollSection({ tripId }: { tripId: string }) {
                   <Button
                     size="sm"
                     onClick={() => vote(poll.id, opt.id)}
-                    disabled={poll.isClosed}
+                    disabled={
+                      poll.isClosed ||
+                      poll.votes.some((v) => v.userId === "temp")
+                    }
                     className="whitespace-nowrap"
                   >
                     Vote
@@ -241,14 +251,3 @@ export default function PollSection({ tripId }: { tripId: string }) {
     </div>
   );
 }
-
-
-type Poll = {
-  id: string;
-  question: string;
-  type: "SINGLE" | "MULTIPLE";
-  isClosed: boolean;
-  createdBy: string;
-  options: { id: string; text: string }[];
-  votes: { id: string; optionId: string; userId: string }[];
-};

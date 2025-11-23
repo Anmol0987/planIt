@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import ChatSection from "@/components/ChatSection";
 import PollSection from "@/components/PollSection";
+import { SkeletonTripDetails } from "@/components/SkeletonComponents";
 
 export default function TripDetailsPage() {
   const router = useRouter();
@@ -34,8 +35,17 @@ export default function TripDetailsPage() {
   const { user } = useAuthStore();
 
   const { trip, invites, setInvites, loading, isAdmin } = useTripData(tripId);
-  const { activeMembers } = useTripSocket(tripId, setInvites);
-  const { itinerary, loading: itineraryLoading } = useItinerary(tripId);
+
+  const {
+    itinerary,
+    loading: itineraryLoading,
+    fetchItinerary,
+  } = useItinerary(trip ? trip.id : undefined);
+
+  const { activeMembers } = useTripSocket(
+    trip ? trip.id : undefined,
+    setInvites
+  );
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
@@ -50,6 +60,7 @@ export default function TripDetailsPage() {
       await api.post(`/itinerary/create/${tripId}`, data);
       toast.success("Itinerary added");
       setAddOpen(false);
+      fetchItinerary();
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to add itinerary");
     } finally {
@@ -64,24 +75,24 @@ export default function TripDetailsPage() {
       setInviteEmail("");
       setInviteOpen(false);
       toast.success("Invite sent!");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Failed to send invite");
     } finally {
       setSending(false);
     }
   };
 
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-foreground">
-        Loading…
-      </div>
-    );
-  }
+  // if (!user) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center text-foreground">
+  //       Loading…
+  //     </div>
+  //   );
+  // }
 
   if (loading || !trip || itineraryLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-foreground">
-        Loading trip…
-      </div>
+      <SkeletonTripDetails/>
     );
   }
 
@@ -105,8 +116,8 @@ export default function TripDetailsPage() {
         />
       </div>
 
-      <Tabs defaultValue="itinerary" className="w-full max-w-3xl mt-6">
-        <TabsList className="grid grid-cols-3 md:grid-cols-4 w-full gap-3 bg-muted text-foreground mb-2">
+      <Tabs defaultValue="itinerary" className="w-full max-w-3xl mt-6 mb-4 ">
+        <TabsList className="grid grid-cols-3 md:grid-cols-5 w-full gap-3  text-foreground mb-2">
           <TabsTrigger value="itinerary" className="text-sm flex items-center">
             <CalendarIcon className="w-4 h-4 mr-1" />
             Itinerary
@@ -125,7 +136,10 @@ export default function TripDetailsPage() {
             <MessageSquareIcon className="w-4 h-4 mr-1" />
             Poll
           </TabsTrigger>
-
+          <TabsTrigger value="invites" className="text-sm flex items-center ">
+            <MailPlusIcon className="w-4 h-4 mr-1 " />
+            Invites
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="itinerary" className="pt-4">
@@ -147,6 +161,12 @@ export default function TripDetailsPage() {
           <PollSection tripId={tripId} />
         </TabsContent>
 
+        <TabsContent value="invites" className="pt-4">
+          <PendingInvites invites={invites} />
+          <Button className="mt-4 w-full" onClick={() => setInviteOpen(true)}>
+            Send Invite
+          </Button>
+        </TabsContent>
       </Tabs>
 
       <InviteDialog

@@ -19,11 +19,8 @@ import {
 import { MoreVertical, Trash2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import EditTripDialog from "@/components/dialogs/EditTripDialog";
-import {
-  SkeletonHeader,
-  SkeletonTripCard,
-  SkeletonTripList,
-} from "@/components/SkeletonComponents/SkeletonHeader";
+import { SkeletonHeader, SkeletonTripList } from "@/components/SkeletonComponents";
+
 
 export default function Dashboard() {
   const router = useRouter();
@@ -46,8 +43,8 @@ export default function Dashboard() {
         setUser((userRes.value as any).data.user);
       } else {
         setUser(null);
-        router.replace("/");
-        return;
+        router.replace("/login");
+        return null;
       }
 
       if (tripsRes.status === "fulfilled") {
@@ -99,14 +96,11 @@ export default function Dashboard() {
       <div className="w-full max-w-3xl space-y-8">
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           {loading ? (
-            <div className="space-y-1">
-              <div className="h-8 sm:h-9 w-48 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 rounded animate-shimmer bg-[length:200%_100%]" />
-              <div className="h-4 w-36 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 rounded animate-shimmer bg-[length:200%_100%]" />
-            </div>
+           <SkeletonHeader />
           ) : (
             <div className="space-y-1">
               <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">
-                Welcome, {user.name}
+              Welcome, {user?.name || "Guest"}
               </h2>
               <p className="text-sm text-muted-foreground">
                 Manage your trips and plans
@@ -120,41 +114,7 @@ export default function Dashboard() {
         </header>
 
         {loading ? (
-          <section>
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="rounded-xl overflow-hidden border border-border shadow-sm"
-                >
-                  <div className="relative rounded-xl overflow-hidden">
-                    {/* Background shimmer */}
-                    <div className="absolute inset-0">
-                      <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 animate-shimmer bg-[length:200%_100%]" />
-                      <div className="absolute inset-0 bg-gradient-to-tr from-black/60 via-black/20 to-transparent" />
-                    </div>
-
-                    <div className="relative z-10 p-5 flex flex-col gap-3">
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-2 flex-1">
-                          {/* Title skeleton */}
-                          <div className="h-7 w-48 bg-white/20 dark:bg-white/10 rounded animate-pulse" />
-                          {/* Destination skeleton */}
-                          <div className="h-4 w-36 bg-white/20 dark:bg-white/10 rounded animate-pulse" />
-                        </div>
-
-                        {/* Menu button skeleton */}
-                        <div className="h-8 w-8 rounded-full bg-white/20 dark:bg-white/10 animate-pulse" />
-                      </div>
-
-                      {/* Date skeleton */}
-                      <div className="h-4 w-44 bg-white/20 dark:bg-white/10 rounded animate-pulse" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+         <SkeletonTripList count={3} />
         ) : (
           <section>
             {trips.length > 0 ? (
