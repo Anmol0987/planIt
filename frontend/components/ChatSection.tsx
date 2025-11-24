@@ -27,13 +27,12 @@ export default function ChatSection({ tripId }: { tripId: string }) {
         <div
           className="
             absolute inset-0 
-            bg-[url('/chat-bg.png')] 
             bg-top 
             bg-cover 
             bg-no-repeat    
           "
+          style={{ backgroundImage: "url('/chat-bg.png')" }}
         ></div>
-
       </div>
 
       <div
@@ -102,7 +101,10 @@ export default function ChatSection({ tripId }: { tripId: string }) {
               else stopTyping();
             }}
           />
-          <Button onClick={handleSend} className="rounded-full px-6 bg-neutral-50 border-neutral-500 border">
+          <Button
+            onClick={handleSend}
+            className="rounded-full px-6 bg-neutral-50 border-neutral-500 border"
+          >
             Send
           </Button>
         </div>

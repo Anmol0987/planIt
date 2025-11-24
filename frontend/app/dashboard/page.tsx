@@ -128,7 +128,7 @@ export default function Dashboard() {
                       <div className="relative group rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
                         <div className="absolute inset-0">
                           <div
-                            className="absolute inset-0 bg-cover bg-center opacity-60 group-hover:opacity-80 transition"
+                            className="absolute inset-0 bg-cover bg-center opacity-80 group-hover:opacity-100 transition"
                             style={{
                               backgroundImage: `url('/card-bg.jpeg')`,
                             }}

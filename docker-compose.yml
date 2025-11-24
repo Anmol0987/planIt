@@ -9,3 +9,15 @@ services:
       - ./backend/.env
     container_name: planIt-BE
     restart: always
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+
+    depends_on:
+      - backend
+    container_name: planIt-FE
+    restart: always

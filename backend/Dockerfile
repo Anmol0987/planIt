@@ -11,14 +11,14 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-
+RUN npx prisma generate
 RUN npm run build
 
 # ==========================
 # Stage 2: Production
 # ==========================
 
-FROM node:20-alpine AS producttion
+FROM node:20-alpine AS production
 
 WORKDIR /app
 ENV NODE_ENV=production

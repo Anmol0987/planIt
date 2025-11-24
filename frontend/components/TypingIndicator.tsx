@@ -9,9 +9,9 @@ export function TypingIndicator() {
         "
       >
         <div className="flex gap-1 items-center">
-          <span className="w-2.5 h-2.5 rounded-full bg-foreground/40 animate-typingDot"></span>
-          <span className="w-2.5 h-2.5 rounded-full bg-foreground/40 animate-typingDot animation-delay-150"></span>
-          <span className="w-2.5 h-2.5 rounded-full bg-foreground/40 animate-typingDot animation-delay-300"></span>
+          <span className="w-2.5 h-2.5 rounded-full bg-white animate-typingDot"></span>
+          <span className="w-2.5 h-2.5 rounded-full bg-white animate-typingDot animation-delay-150"></span>
+          <span className="w-2.5 h-2.5 rounded-full bg-white animate-typingDot animation-delay-300"></span>
         </div>
       </div>
     </div>
